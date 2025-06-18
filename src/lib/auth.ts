@@ -1,29 +1,39 @@
 
 import { redirect } from "react-router-dom"
 import type { RegisterData, User } from "@/types/auth"
-
+import URLMapping from "@/utils/URLMapping";
 // Mock authentication functions - replace with your actual auth implementation
 export async function loginWithEmail(email: string, password: string): Promise<User> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+  try {
+    const response = await fetch(URLMapping.LOGIN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
 
-  // Mock validation
-  if (email === "demo@example.com" && password === "password123") {
-    const user: User = {
-      id: "1",
-      email: email,
-      name: "Demo User",
-      avatar: "email",
-      subscription: "vip",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || "Đăng nhập thất bại")
     }
 
-    redirect("/Home")
-    return user
-  }
+    const data = await response.json()
 
-  throw new Error("Invalid email or password")
+    // Giả sử API trả về đối tượng user dạng string -> cần convert Date lại
+    const user: User = {
+      ...data,
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+    }
+
+    redirect("/Home") // ← chỉ dùng trong Server Components (Next.js)
+    // Nếu dùng React Router DOM thì dùng: `useNavigate()` trong component
+
+    return user
+  } catch (error: any) {
+    throw new Error(error.message || "Đã có lỗi xảy ra")
+  }
 }
 
 export async function registerWithEmail(data: RegisterData): Promise<User> {

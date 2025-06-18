@@ -139,33 +139,6 @@ export function RegisterForm() {
 
         <form onSubmit={handleEmailRegister} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium">
-              Full Name
-            </Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Enter your full name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`pl-10 h-12 ${
-                  error?.field === "name" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
-                disabled={isLoading}
-              />
-            </div>
-            {error?.field === "name" && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {error.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
               Email Address
             </Label>
