@@ -1,23 +1,18 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "@/app/globals.css"
-
-const inter = Inter({ subsets: ["latin"] })
-
-export const metadata: Metadata = {
-  title: "JapanLearn - Học tiếng Nhật trực tuyến",
-  description: "Nền tảng học tiếng Nhật trực tuyến hàng đầu Việt Nam",
-}
+import React from "react";
+import "./globals.css";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/Footer"; // ⚠️ chú ý chữ thường
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
-      <body className={inter.className}>{children}</body>
-    </html>
-  )
+    <div className="font-sans">
+      <Header />
+      <main>{children}</main>
+      <Footer />
+    </div>
+  );
 }

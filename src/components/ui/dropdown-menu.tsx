@@ -7,13 +7,25 @@ const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
   return <div className="relative inline-block text-left">{children}</div>
 }
 
-const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
-  ({ className, children, ...props }, ref) => (
+const DropdownMenuTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
+>(({ className, children, asChild, ...props }, ref) => {
+  if (asChild) {
+    return React.cloneElement(children as React.ReactElement, {
+      ref,
+      ...props,
+      className: cn("inline-flex justify-center", (children as React.ReactElement).props.className, className),
+    })
+  }
+
+  return (
     <button ref={ref} className={cn("inline-flex justify-center", className)} {...props}>
       {children}
     </button>
-  ),
-)
+  )
+})
+
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
 const DropdownMenuContent = React.forwardRef<

@@ -585,6 +585,9 @@ video {
 .sticky {
   position: sticky;
 }
+.inset-0 {
+  inset: 0px;
+}
 .-right-1 {
   right: -0.25rem;
 }
@@ -597,6 +600,9 @@ video {
 .left-1\/2 {
   left: 50%;
 }
+.left-3 {
+  left: 0.75rem;
+}
 .right-0 {
   right: 0px;
 }
@@ -605,6 +611,9 @@ video {
 }
 .top-16 {
   top: 4rem;
+}
+.top-3 {
+  top: 0.75rem;
 }
 .top-full {
   top: 100%;
@@ -642,6 +651,9 @@ video {
 }
 .mb-8 {
   margin-bottom: 2rem;
+}
+.mr-2 {
+  margin-right: 0.5rem;
 }
 .mt-1 {
   margin-top: 0.25rem;
@@ -737,6 +749,12 @@ video {
 .max-w-max {
   max-width: -moz-max-content;
   max-width: max-content;
+}
+.max-w-md {
+  max-width: 28rem;
+}
+.max-w-xs {
+  max-width: 20rem;
 }
 .flex-1 {
   flex: 1 1 0%;
@@ -899,13 +917,13 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(6 78 59 / var(--tw-bg-opacity, 1));
 }
-.bg-gray-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
-}
 .bg-red-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
+}
+.bg-teal-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(13 148 136 / var(--tw-bg-opacity, 1));
 }
 .bg-transparent {
   background-color: transparent;
@@ -942,6 +960,9 @@ video {
 }
 .to-orange-500 {
   --tw-gradient-to: #f97316 var(--tw-gradient-to-position);
+}
+.to-teal-100 {
+  --tw-gradient-to: #ccfbf1 var(--tw-gradient-to-position);
 }
 .to-teal-50 {
   --tw-gradient-to: #f0fdfa var(--tw-gradient-to-position);
@@ -1015,8 +1036,14 @@ video {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
+.pl-10 {
+  padding-left: 2.5rem;
+}
 .pl-4 {
   padding-left: 1rem;
+}
+.pr-10 {
+  padding-right: 2.5rem;
 }
 .pt-0 {
   padding-top: 0px;
@@ -1071,6 +1098,9 @@ video {
 .font-semibold {
   font-weight: 600;
 }
+.uppercase {
+  text-transform: uppercase;
+}
 .leading-none {
   line-height: 1;
 }
@@ -1100,10 +1130,6 @@ video {
 .text-gray-600 {
   --tw-text-opacity: 1;
   color: rgb(75 85 99 / var(--tw-text-opacity, 1));
-}
-.text-gray-800 {
-  --tw-text-opacity: 1;
-  color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 .text-red-600 {
   --tw-text-opacity: 1;
@@ -1238,6 +1264,13 @@ video {
 .hover\:bg-red-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-teal-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(15 118 110 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-transparent:hover {
+  background-color: transparent;
 }
 .hover\:from-yellow-500:hover {
   --tw-gradient-from: #eab308 var(--tw-gradient-from-position);

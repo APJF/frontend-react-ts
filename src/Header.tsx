@@ -1,6 +1,6 @@
-"use client"
 
 import { useState } from "react"
+import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -36,9 +36,9 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className={styles.navigation.desktop}>
-          <a href="#" className={styles.navigation.link}>
+          <Link to="/about" className={styles.navigation.link}>
             Giới thiệu
-          </a>
+          </Link>
 
           {/* Khóa học Dropdown */}
           <NavigationMenu>
@@ -47,15 +47,9 @@ export default function Header() {
                 <NavigationMenuTrigger className={styles.navigation.dropdown.trigger}>Khóa học</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className={styles.navigation.dropdown.content}>
-                    <a href="#" className={styles.navigation.dropdown.item}>
-                      🎓<span className="text-sm font-medium">Khóa N5</span>
-                    </a>
-                    <a href="#" className={styles.navigation.dropdown.item}>
-                      🎓<span className="text-sm font-medium">Khóa N4</span>
-                    </a>
-                    <a href="#" className={styles.navigation.dropdown.item}>
-                      🎓<span className="text-sm font-medium">Khóa N3</span>
-                    </a>
+                    <Link to="/courses/n5" className={styles.navigation.dropdown.item}>🎓 Khóa N5</Link>
+                    <Link to="/courses/n4" className={styles.navigation.dropdown.item}>🎓 Khóa N4</Link>
+                    <Link to="/courses/n3" className={styles.navigation.dropdown.item}>🎓 Khóa N3</Link>
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>

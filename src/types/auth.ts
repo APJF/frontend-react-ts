@@ -4,8 +4,8 @@ export interface User {
   name: string
   avatar?: string
   subscription: "free" | "vip"
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface AuthState {
@@ -30,4 +30,13 @@ export interface RegisterData {
 export interface AuthResponse {
   user: User
   token: string
+}
+export interface LoginError {
+  field: "email" | "password" | "general"
+  message: string
+}
+
+export interface RegisterError {
+  field: "name" | "email" | "password" | "confirmPassword" | "general"
+  message: string
 }
