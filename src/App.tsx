@@ -1,19 +1,22 @@
-// src/App.tsx
-import { Routes, Route, Navigate } from 'react-router-dom'; // Chỉ cần import Routes, Route,...
-import AuthPage from './pages/AuthPage';
-// import DashboardPage from './pages/DashboardPage';
+import { Routes, Route, Navigate } from 'react-router-dom'
+import LoginPage from './app/Authentication/LoginPage';
+import RegisterPage from './app/Authentication/RegisterPage';
+import CourseListPage from './app/Common/CourseListPage'
+import HomePage from './app/page';
 
 function App() {
-  const isAuthenticated = false; 
+  const isAuthenticated = false;
 
-  // KHÔNG còn <Router> ở đây nữa
-  return ( 
-    <Routes> 
-      <Route path="/" element={<Navigate replace to="/auth" />} /> 
-      <Route path="/auth" element={!isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" />} /> 
-      {/* <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/auth" />} /> */}
-      <Route path="*" element={<Navigate replace to="/auth" />} /> 
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      {/* Thay vì AuthPage, bạn có thể render LoginPage hoặc một component khác */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/courselist" element={<CourseListPage />} />
+      <Route path="*" element={<HomePage />} />
     </Routes>
-  );
+  )
 }
-export default App;
+
+export default App
