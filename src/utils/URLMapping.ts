@@ -9,7 +9,10 @@ const API_URL =
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
 
-    LIST_SUBJECT:"/subjects/list"
+    LIST_SUBJECT:"/subjects/list",
+    SUBJECT_ID:"/subjects/subject",
+    COURSE_CHAPTER:"/chapters/list",
+    COURSE_SLOT:"/slots/list"
   }
 export default URLMapping;
 

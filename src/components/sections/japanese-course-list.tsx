@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useEffect, useState } from "react"
 import { Search, Filter, Star, Clock, Users, BookOpen, ChevronDown, Award, Target } from "lucide-react"
@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAPI } from "@/hooks/useAPI"
 import URLMapping from "@/utils/URLMapping"
+import { useNavigate } from "react-router-dom"
 
 // Sample Japanese course data
 
@@ -18,6 +19,7 @@ export default function JapaneseCourseList() {
   const [sortBy, setSortBy] = useState("Mới nhất")
   const [japaneseCourses, setJapaneseCourses] = useState<any[]>([]);
   const { API } = useAPI();
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadData();
@@ -28,8 +30,6 @@ export default function JapaneseCourseList() {
     console.log("Dữ liệu khóa học:", response.data);
     setJapaneseCourses(response);
   };
-
-
 
   const filteredCourses = japaneseCourses.filter((course) => {
     const matchesSearch =
@@ -129,7 +129,7 @@ export default function JapaneseCourseList() {
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-red-600">Miễn phí</span>
                   </div>
-                  <Button className="bg-red-600 hover:bg-red-700 text-white">Học ngay</Button>
+                  <Button onClick={()=> {navigate(`/coursedetail/${course.id}`)}} className="bg-red-600 hover:bg-red-700 text-white">Học ngay</Button>
                 </div>
               </CardFooter>
             </Card>
