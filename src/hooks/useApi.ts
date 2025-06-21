@@ -23,11 +23,17 @@ export function useAPI() {
       if (showLoadingUI) {
       }
 
-      const response = await fetch(`${API_URL}/api/${url}`, {
+      const options: RequestInit = {
         method,
-        headers,
-        body: method === 'GET' || method === 'DELETE' ? null : data instanceof FormData ? data : JSON.stringify(data),
-      });
+        headers
+      };
+
+      // Chỉ thêm body nếu không phải GET hoặc DELETE
+      if (method !== 'GET' && method !== 'DELETE') {
+        options.body = data instanceof FormData ? data : JSON.stringify(data);
+      }
+
+      const response = await fetch(`${API_URL}/api/${url}`, options);
 
       if (!response.ok) {
         return handleErrorResponse(response, showToast);

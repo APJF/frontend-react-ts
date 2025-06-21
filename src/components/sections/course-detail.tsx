@@ -1,6 +1,6 @@
 
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
 import {
   ArrowLeft,
   Star,
@@ -21,67 +21,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { useAPI } from "@/hooks/useAPI"
 import URLMapping from "@/utils/URLMapping"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
 
-interface Course {
-  id: number
-  title: string
-  description: string
-  image: string
-  price: string
-  originalPrice: string
-  rating: number
-  students: number
-  duration: string
-  level: string
-  instructor: string
-  category: string
-  vocabulary: string
-  grammar: string
-  isHot: boolean
-  isBestseller: boolean
+interface Slot {
+  id: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  orderNumber: number;
 }
 
-const curriculum = [
-  {
-    id: 1,
-    title: "Chương 1: Giới thiệu về tiếng Nhật",
-    lessons: [
-      { id: 1, title: "Lịch sử và đặc điểm của tiếng Nhật", duration: "15 phút", isCompleted: false },
-      { id: 2, title: "Hệ thống chữ viết Nhật Bản", duration: "20 phút", isCompleted: false },
-      { id: 3, title: "Cách phát âm cơ bản", duration: "25 phút", isCompleted: false },
-    ],
-  },
-  {
-    id: 2,
-    title: "Chương 2: Hiragana - Bảng chữ cái đầu tiên",
-    lessons: [
-      { id: 4, title: "Học Hiragana あ-の", duration: "30 phút", isCompleted: false },
-      { id: 5, title: "Học Hiragana は-ん", duration: "30 phút", isCompleted: false },
-      { id: 6, title: "Luyện tập viết Hiragana", duration: "45 phút", isCompleted: false },
-      { id: 7, title: "Bài kiểm tra Hiragana", duration: "20 phút", isCompleted: false },
-    ],
-  },
-  {
-    id: 3,
-    title: "Chương 3: Katakana - Bảng chữ cái thứ hai",
-    lessons: [
-      { id: 8, title: "Học Katakana ア-ノ", duration: "30 phút", isCompleted: false },
-      { id: 9, title: "Học Katakana ハ-ン", duration: "30 phút", isCompleted: false },
-      { id: 10, title: "Từ vựng ngoại lai với Katakana", duration: "40 phút", isCompleted: false },
-    ],
-  },
-  {
-    id: 4,
-    title: "Chương 4: Từ vựng và ngữ pháp cơ bản",
-    lessons: [
-      { id: 11, title: "Chào hỏi và giới thiệu bản thân", duration: "35 phút", isCompleted: false },
-      { id: 12, title: "Số đếm và thời gian", duration: "40 phút", isCompleted: false },
-      { id: 13, title: "Gia đình và nghề nghiệp", duration: "45 phút", isCompleted: false },
-    ],
-  },
-]
+interface Chapter {
+  id: number;
+  title: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  orderNumber: number;
+  slots: Slot[];
+}
+
+interface Course {
+  id: number;
+  title: string;
+  topic: string;
+  description: string;
+  level: string;
+  estimatedDuration: string;
+  creatorId: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+  orderNumber: number;
+  chapters: Chapter[];
+}
+
 
 const reviews = [
   {
@@ -113,9 +89,10 @@ const reviews = [
 export default function CourseDetail() {
   // const [course, setCourse] = useState<Course | null>(null)
   // const [isWishlisted, setIsWishlisted] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [japaneseCourses, setJapaneseCourses] = useState<any[]>([]);
   const { API } = useAPI();
-  
+  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
@@ -123,39 +100,12 @@ export default function CourseDetail() {
   }, []);
 
   const loadData = async () => {
-    const response = await API.get(URLMapping.SUBJECT_ID+"?id=" +id);
+    const response = await API.get(`/subjects/detail/${id}`);
     console.log(response);
     setJapaneseCourses([response]);
+    setSelectedCourse(response);
   };
 
-
-  // const filteredCourses = japaneseCourses.filter((course) => {
-  //   const matchesSearch =
-  //     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     course.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-  //   const matchesCategory = selectedCategory === "Tất cả" || course.topic === selectedCategory;
-  //   const matchesLevel = selectedLevel === "Tất cả" || course.level === selectedLevel;
-
-  //   return matchesSearch && matchesCategory && matchesLevel;
-  // });
-
-  // if (!course) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="text-6xl mb-4">🇯🇵</div>
-  //         <p className="text-gray-600">Đang tải thông tin khóa học...</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
-  const totalLessons = curriculum.reduce((total, chapter) => total + chapter.lessons.length, 0)
-  const completedLessons = curriculum.reduce(
-    (total, chapter) => total + chapter.lessons.filter((lesson) => lesson.isCompleted).length,
-    0,
-  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
@@ -194,7 +144,6 @@ export default function CourseDetail() {
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span className="font-medium">{course.rating}</span>
-                      {/* <span className="text-gray-500">({course.students.toLocaleString()} học viên)</span> */}
                     </div>
                     <div className="flex items-center gap-1 text-gray-600">
                       <Clock className="h-4 w-4" />
@@ -232,32 +181,23 @@ export default function CourseDetail() {
                         <BookOpen className="h-5 w-5 text-red-600" />
                         Chương trình học
                       </CardTitle>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span>{curriculum.length} chương</span>
-                        <span>{totalLessons} bài học</span>
-                        <span>Tiến độ: {Math.round((completedLessons / totalLessons) * 100)}%</span>
-                      </div>
-                      <Progress value={(completedLessons / totalLessons) * 100} className="w-full" />
+                  
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {curriculum.map((chapter) => (
+                      {selectedCourse?.chapters?.sort((a, b) => a.orderNumber - b.orderNumber).map((chapter: Chapter) => (
                         <div key={chapter.id} className="border rounded-lg p-4">
                           <h3 className="font-semibold text-lg mb-3 text-gray-900">{chapter.title}</h3>
                           <div className="space-y-2">
-                            {chapter.lessons.map((lesson) => (
+                            {chapter.slots?.sort((a, b) => a.orderNumber - b.orderNumber).map((slot) => (
                               <div
-                                key={lesson.id}
+                                key={slot.id}
                                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
-                                  {lesson.isCompleted ? (
-                                    <CheckCircle className="h-5 w-5 text-green-500" />
-                                  ) : (
-                                    <Play className="h-5 w-5 text-gray-400" />
-                                  )}
-                                  <span className="font-medium">{lesson.title}</span>
+                                  
+                                <Button onClick={() => { navigate(`/slot/${slot.id}`) }} className="font-medium">{slot.title}</Button>
                                 </div>
-                                <span className="text-sm text-gray-500">{lesson.duration}</span>
+                       
                               </div>
                             ))}
                           </div>
@@ -386,20 +326,12 @@ export default function CourseDetail() {
                         <span className="text-3xl font-bold text-red-600">{course.price}₫</span>
                         <span className="text-lg text-gray-500 line-through ml-2">{course.originalPrice}₫</span>
                       </div>
-                      {/* <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsWishlisted(!isWishlisted)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Heart className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`} />
-                      </Button> */}
+                      
                     </div>
 
                     <div className="space-y-3">
                       <Button
                         className="w-full bg-red-600 hover:bg-red-700 text-white text-lg py-3"
-                      // onClick={handleViewSlots}
                       >
                         Xem lịch học
                       </Button>
@@ -424,10 +356,10 @@ export default function CourseDetail() {
                         <span className="text-gray-600">Thời lượng:</span>
                         <span className="font-medium">{course.estimatedDuration}</span>
                       </div>
-                      <div className="flex justify-between">
+                      {/* <div className="flex justify-between">
                         <span className="text-gray-600">Số bài học:</span>
                         <span className="font-medium">{totalLessons} bài</span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between">
                         <span className="text-gray-600">Cấp độ:</span>
                         <span className="font-medium">JLPT {course.level}</span>
@@ -441,35 +373,6 @@ export default function CourseDetail() {
                         <span className="font-medium">Trọn đời</span>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* What you'll learn */}
-              <Card className="border-red-100">
-                <CardHeader>
-                  <CardTitle className="text-lg">Bạn sẽ học được gì?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Nắm vững hệ thống chữ viết Hiragana và Katakana</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Học {course.vocabulary} từ vựng cơ bản</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Hiểu và sử dụng {course.grammar}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Giao tiếp cơ bản trong cuộc sống hàng ngày</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Chuẩn bị tốt cho kỳ thi JLPT {course.level}</span>
                   </div>
                 </CardContent>
               </Card>

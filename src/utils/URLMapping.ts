@@ -10,9 +10,8 @@ const API_URL =
     RESET_PASSWORD: "/reset-password",
 
     LIST_SUBJECT:"/subjects/list",
-    SUBJECT_ID:"/subjects/subject",
-    COURSE_CHAPTER:"/chapters/list",
-    COURSE_SLOT:"/slots/list"
+    SUBJECT_DETAIL:"/subjects/detail",
+    SLOT_SKILL:"/slots"
   }
 export default URLMapping;
 

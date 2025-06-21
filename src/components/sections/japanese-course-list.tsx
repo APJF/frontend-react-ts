@@ -25,10 +25,15 @@ export default function JapaneseCourseList() {
     loadData();
   }, []);
 
+  const [pagination, setPagination] = useState({ totalElements: 0, totalPages: 0 });
+
   const loadData = async () => {
     const response = await API.get(URLMapping.LIST_SUBJECT);
-    console.log("Dữ liệu khóa học:", response.data);
-    setJapaneseCourses(response);
+    setJapaneseCourses(response.content);
+    setPagination({
+      totalElements: response.totalElements,
+      totalPages: response.totalPages,
+    });
   };
 
   const filteredCourses = japaneseCourses.filter((course) => {
@@ -129,7 +134,7 @@ export default function JapaneseCourseList() {
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-red-600">Miễn phí</span>
                   </div>
-                  <Button onClick={()=> {navigate(`/coursedetail/${course.id}`)}} className="bg-red-600 hover:bg-red-700 text-white">Học ngay</Button>
+                  <Button onClick={() => { navigate(`/coursedetail/${course.id}`) }} className="bg-red-600 hover:bg-red-700 text-white">Học ngay</Button>
                 </div>
               </CardFooter>
             </Card>
