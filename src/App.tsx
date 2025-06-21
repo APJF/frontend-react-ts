@@ -2,7 +2,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './app/Authentication/LoginPage';
 import RegisterPage from './app/Authentication/RegisterPage';
 import CourseListPage from './app/Common/CourseListPage'
+import CourseDetail from './components/sections/course-detail';
 import HomePage from './app/page';
+import ChatbotPage from './app/Common/ChatBot';
+import SlotSkills from './components/sections/slot-skills';
+import Vocabulary from './components/sections/vocabulary';
 
 function App() {
   const isAuthenticated = false;
@@ -14,6 +18,10 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/courselist" element={<CourseListPage />} />
+      <Route path="/coursedetail/:id" element={<CourseDetail />} />
+      <Route path="/chatbot" element={<ChatbotPage />} />
+      <Route path="/slot/:id" element={<SlotSkills />} />
+      <Route path="/vocabulary" element={<Vocabulary />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )
