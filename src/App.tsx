@@ -7,6 +7,8 @@ import HomePage from './app/page';
 import ChatbotPage from './app/Common/ChatBot';
 import SlotSkills from './components/sections/slot-skills';
 import Vocabulary from './components/sections/vocabulary';
+import CMSStaffInterface from './app/Staff/add-new-subject';
+import JapaneseLearningPage from './components/sections/japanese-learning-page';
 
 function App() {
   const isAuthenticated = false;
@@ -22,6 +24,8 @@ function App() {
       <Route path="/chatbot" element={<ChatbotPage />} />
       <Route path="/slot/:id" element={<SlotSkills />} />
       <Route path="/vocabulary" element={<Vocabulary />} />
+      <Route path="/newsubject" element={<CMSStaffInterface />} />
+      <Route path="/material" element={<JapaneseLearningPage />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )
