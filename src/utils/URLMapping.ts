@@ -1,5 +1,5 @@
 const API_URL =
-  (import.meta.env.VITE_API_URL as string) || "http://localhost:8081/api/users";
+  (import.meta.env.VITE_API_URL as string) || "http://localhost:8082";
 
   const URLMapping = {
     LOGIN: "/login",
@@ -11,7 +11,7 @@ const API_URL =
 
     LIST_SUBJECT:"/subjects/list",
     SUBJECT_DETAIL:"/subjects/detail",
-    SLOT_SKILL:"/slots",
+    SLOT_SKILL:"/slots/detail",
     MATERIAL:"/materials/slot"
   }
 export default URLMapping;
