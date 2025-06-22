@@ -25,7 +25,7 @@ function App() {
       <Route path="/slot/:id" element={<SlotSkills />} />
       <Route path="/vocabulary" element={<Vocabulary />} />
       <Route path="/newsubject" element={<CMSStaffInterface />} />
-      <Route path="/material" element={<JapaneseLearningPage />} />
+      <Route path="/materials/slot/:id" element={<JapaneseLearningPage />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )

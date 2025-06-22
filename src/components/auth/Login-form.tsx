@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, redirect } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,9 @@ import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { loginWithEmail, loginWithGoogle } from "@/lib/auth"
 import type { LoginCredentials, LoginError } from "@/types/auth"
 import { GoogleIcon } from "../icons/google-icon"
+import { useAPI } from "@/hooks/useAPI"
+import URLMapping from "@/utils/URLMapping"
+import { useNavigate, useParams } from "react-router-dom"
 
 export function LoginForm() {
   const [formData, setFormData] = useState<LoginCredentials>({
@@ -23,6 +26,8 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<LoginError | null>(null)
+   const { API } = useAPI();
+    const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -51,23 +56,15 @@ export function LoginForm() {
     return true
   }
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
+  const handleEmailLogin = async () => {
+    const payload = {
+      email: formData.email,
+      password: formData.password,
+    }
 
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      await loginWithEmail(formData.email, formData.password)
-      // Redirect will be handled by the auth function
-    } catch (err) {
-      setError({
-        field: "general",
-        message: err instanceof Error ? err.message : "Login failed. Please try again.",
-      })
-    } finally {
-      setIsLoading(false)
+    const response = await API.post(URLMapping.LOGIN,payload);
+    if(response.success){
+      navigate(`/home`);
     }
   }
 
@@ -133,7 +130,7 @@ export function LoginForm() {
         )}
 
         {/* Email Login Form */}
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
               Email Address
@@ -213,7 +210,7 @@ export function LoginForm() {
           </div>
 
           <Button
-            type="submit"
+            type ="button" onClick={handleEmailLogin}
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-medium"
             disabled={isLoading}
           >
