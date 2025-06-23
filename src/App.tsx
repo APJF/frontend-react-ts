@@ -9,6 +9,7 @@ import SlotSkills from './components/sections/slot-skills';
 import Vocabulary from './components/sections/vocabulary';
 import CMSStaffInterface from './app/Staff/add-new-subject';
 import JapaneseLearningPage from './components/sections/japanese-learning-page';
+import ManagerApproveStaffRequestPage from'./app/Manager/approve-staff-request';
 
 function App() {
   const isAuthenticated = false;
@@ -27,6 +28,8 @@ function App() {
       <Route path="/newsubject" element={<CMSStaffInterface />} />
       <Route path="/materials/slot/:id" element={<JapaneseLearningPage />} />
       <Route path="*" element={<HomePage />} />
+      <Route path="/manager/request" element={<ManagerApproveStaffRequestPage />} />
+
     </Routes>
   )
 }
