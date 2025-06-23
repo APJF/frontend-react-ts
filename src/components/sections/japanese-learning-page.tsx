@@ -61,6 +61,8 @@ export default function JapaneseLearningPage() {
   const { API } = useAPI();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedLesson, setSelectedLesson] = useState<Material | null>(null);
+
 
   useEffect(() => {
     loadData();
@@ -71,6 +73,8 @@ export default function JapaneseLearningPage() {
     console.log(response);
     setSlotData(response);
     setSlotSkill([response]);
+    setSelectedLesson(response.materials?.[0] || null);
+
   };
 
   function getLevelColor(level: any) {
@@ -96,9 +100,9 @@ export default function JapaneseLearningPage() {
                   {slotData?.materials.map((lesson: Material) => (
                     <div
                       key={lesson.id}
-                      className={`p-4 border-b border-red-100 cursor-pointer transition-colors hover:bg-red-50 ${lesson.id === lesson.id ? "bg-red-100 border-l-4 border-l-red-500" : ""
+                      onClick={() => setSelectedLesson(lesson)}
+                      className={`p-4 border-b border-red-100 cursor-pointer transition-colors hover:bg-red-50 ${selectedLesson?.id === lesson.id ? "bg-red-100 border-l-4 border-l-red-500" : ""
                         }`}
-
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
@@ -122,32 +126,24 @@ export default function JapaneseLearningPage() {
           </div>
 
           {/* Main Content */}
+          {/* Main Content */}
           <div className="lg:col-span-3">
-            {slotData?.materials.map((lesson: Material) => (
+            {selectedLesson && (
               <Card className="border-red-200 shadow-lg">
                 <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-xl">{lesson.title}</CardTitle>
-                      <CardDescription className="text-red-100 mt-2">{lesson.description}</CardDescription>
+                      <CardTitle className="text-xl">{selectedLesson.title}</CardTitle>
+                      <CardDescription className="text-red-100 mt-2">{selectedLesson.description}</CardDescription>
                     </div>
-                    {/* <Badge className={`${getLevelColor(lesson.level)} bg-white`}>{lesson.level}</Badge> */}
                   </div>
                   <div className="flex items-center gap-4 mt-4">
                     <div className="flex items-center gap-2 text-red-100">
                       <Play className="h-4 w-4" />
-                      {/* <span className="text-sm">{lesson.}</span> */}
                     </div>
-                    {/* {lesson.isCompleted && (
-                      <div className="flex items-center gap-2 text-red-100">
-                        <Star className="h-4 w-4 fill-current" />
-                        <span className="text-sm">Đã hoàn thành</span>
-                      </div>
-                    )} */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Button className="bg-red-600 hover:bg-red-700 text-white">
                       <Play className="h-4 w-4 mr-2" />
@@ -165,7 +161,6 @@ export default function JapaneseLearningPage() {
 
                   <Separator className="mb-6" />
 
-                  {/* Document Viewer */}
                   <div className="bg-white rounded-lg border-2 border-red-200 overflow-hidden">
                     <div className="bg-red-500 text-white p-3">
                       <h3 className="font-medium flex items-center gap-2">
@@ -175,15 +170,14 @@ export default function JapaneseLearningPage() {
                     </div>
                     <div className="aspect-[4/3] bg-gray-50">
                       <iframe
-                        src={lesson.fileUrl}
+                        src={selectedLesson.fileUrl}
                         className="w-full h-full border-0"
-                        title={`Tài liệu: ${lesson.title}`}
+                        title={`Tài liệu: ${selectedLesson.title}`}
                         allow="autoplay"
                       />
                     </div>
                   </div>
 
-                  {/* Study Notes */}
                   <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
                     <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
@@ -199,8 +193,9 @@ export default function JapaneseLearningPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
+
         </div>
       </div>
     </div>
