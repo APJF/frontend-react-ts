@@ -11,6 +11,7 @@ const API_URL =
 
     LIST_SUBJECT:"/subjects/list",
     SUBJECT_DETAIL:"/subjects/detail",
+    SUBJECT_CREATE:"/subjects/create",
     SLOT_SKILL:"/slots/detail",
     MATERIAL:"/materials/slot"
   }
