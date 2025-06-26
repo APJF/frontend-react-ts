@@ -25,7 +25,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DynamicBreadcrumb from "@/app/Common/DynamicBreadcrumb";
 import { Constant } from "@/utils/constant";
-import { MenuItemsCommon, MenuItemsHeader } from "./MenuItems";
+import { MenuItemsStaff, MenuItemsHeader } from "./MenuItems";
 import { useTheme } from "@/hooks";
 
 const { Header, Content, Footer } = Layout;

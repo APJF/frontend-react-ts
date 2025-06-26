@@ -35,7 +35,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DynamicBreadcrumb from "@/app/Common/DynamicBreadcrumb";
 import { Constant } from "@/utils/constant";
-import { MenuItemsCommon } from "./MenuItems";
+import { MenuItemsStaff } from "./MenuItems";
 import { useTheme } from "@/hooks";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -56,7 +56,7 @@ const SidebarLayout: React.FC<{ children: React.ReactNode }> = ({
   const [isAddOrgModalVisible, setIsAddOrgModalVisible] = useState(false);
   const [addOrgForm] = Form.useForm();
   const [isCreatingOrg, setIsCreatingOrg] = useState(false);
-  const MenuItems = MenuItemsCommon
+  const MenuItems = MenuItemsStaff
     
 
   const handleModalCancel = () => {

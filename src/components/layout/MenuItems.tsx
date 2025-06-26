@@ -13,20 +13,18 @@ import {
   ShopOutlined,
 } from "@ant-design/icons";
 
-export const MenuItemsCommon = [
+export const MenuItemsStaff= [
   {
-    label: "Dashboard",
-    key: "dashboard",
+    label: "Danh Sách khóa học",
+    key: "course-list",
     icon: <DashboardOutlined />,
-    path: "/dashboard",
-
+    path: "/list",
   },
   {
-    label: "Bot",
-    key: "bots",
+    label: "Thêm khóa học",
+    key: "addnew",
     icon: <RobotOutlined />,
-    path: "/bots",
-
+    path: "/addnew",
   },
   {
     label: "Chat Tracking",

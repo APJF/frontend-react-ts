@@ -2,7 +2,6 @@ import AutoLayout from "@/components/layout/AutoLayout";
 import { CourseListPage } from "@/components/sections/staff/course-list";
 import { Subject } from "../../components/sections/entity";
 
-// Dữ liệu mock để test
 const mockCourses: Subject[] = [
   {
     id: 1,
@@ -43,7 +42,8 @@ const mockCourses: Subject[] = [
 ];
 
 const Dashboard: React.FC = () => {
-  const handleViewDetails = (course: Subject) => {
+
+    const handleViewDetails = (course: Subject) => {
     console.log("Chi tiết khóa học:", course.title);
   };
 
@@ -54,10 +54,10 @@ const Dashboard: React.FC = () => {
   return (
     <AutoLayout>
       <CourseListPage
-        courses={mockCourses}
-        onViewDetails={handleViewDetails}
-        onAddCourse={handleAddCourse}
-      />
+              courses={mockCourses}
+              onViewDetails={handleViewDetails}
+              onAddCourse={handleAddCourse}
+            />
     </AutoLayout>
   );
 };
