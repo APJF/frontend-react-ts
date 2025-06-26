@@ -18,7 +18,7 @@ export const MenuItemsStaff= [
     label: "Danh Sách khóa học",
     key: "course-list",
     icon: <DashboardOutlined />,
-    path: "/list",
+    path: "/viewlistcourse",
   },
   {
     label: "Thêm khóa học",

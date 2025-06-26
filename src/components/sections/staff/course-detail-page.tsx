@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Edit, Trash2, Users, BookOpen, Star, ChevronDown, ChevronRight, Plus, Clock } from "lucide-react"
-import type { Subject } from "./entity"
+import type { Subject } from "../entity"
 
 interface CourseDetailPageProps {
   course: Subject

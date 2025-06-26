@@ -11,6 +11,7 @@ import JapaneseLearningPage from './components/sections/common/japanese-learning
 import Dashboard from './app/Admin/Dashboard';
 import StaffViewListCourse from './app/Staff/ViewListCourse';
 import AddNewCourse from './app/Staff/AddNewCourse';
+import ViewCourseDetail from './app/Staff/CourseDetail';
 
 function App() {
   const isAuthenticated = false;
@@ -30,6 +31,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
       <Route path="/addnew" element={<AddNewCourse />} />
+      <Route path="/coursedetail" element={<ViewCourseDetail />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )

@@ -18,8 +18,7 @@ import {
   ChevronRight,
   Edit,
 } from "lucide-react"
-import type { Subject } from "./entity"
-
+import { Subject } from "../entity"
 interface CourseDetailModalProps {
   course: Subject
   onClose: () => void

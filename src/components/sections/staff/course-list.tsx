@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Plus, Search } from "lucide-react"
-import type { Subject } from "./entity"
+import type { Subject } from "../entity"
+import { useNavigate } from "react-router-dom"
 
 interface CourseListPageProps {
   courses: Subject[]
@@ -20,6 +21,7 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
+  const navigate= useNavigate();
 
   // Get unique levels and statuses for filters
   const uniqueLevels = Array.from(new Set(courses.map((course) => course.level)))
@@ -164,9 +166,8 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
               <div className="col-span-1">STT</div>
               <div className="col-span-1">ID</div>
               <div className="col-span-4">Tên khóa học</div>
-              <div className="col-span-1">Mức độ</div>
-              <div className="col-span-2">Giảng viên</div>
-              <div className="col-span-2">Trạng thái</div>
+              <div className="col-span-2">Mức độ</div>
+              <div className="col-span-3">Trạng thái</div>
               <div className="col-span-1">Xem chi tiết</div>
             </div>
           </div>
@@ -189,18 +190,18 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
                   <div className="col-span-4">
                     <div className="text-sm font-medium text-blue-900">{course.title}</div>
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     <Badge className={`${getLevelColor(course.level)} text-xs font-medium`}>{course.level}</Badge>
                   </div>
-                  <div className="col-span-2 text-sm text-blue-700 font-medium">{course.creatorId}</div>
-                  <div className="col-span-2">
+                  {/* <div className="col-span-2 text-sm text-blue-700 font-medium">{course.creatorId}</div> */}
+                  <div className="col-span-3">
                     <Badge className={`${getStatusColor(course.status)} text-xs font-medium`}>{course.status}</Badge>
                   </div>
                   <div className="col-span-1">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => onViewDetails(course)}
+                      onClick={() => navigate(`/coursedetail`, { state: { course } })}
                       className="h-8 w-8 p-0 hover:bg-blue-600 hover:text-white transition-colors"
                     >
                       <Eye className="h-4 w-4" />
