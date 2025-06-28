@@ -14,10 +14,12 @@ import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle, User } from "lucide-rea
 import { GoogleIcon } from "@/components/icons/google-icon"
 import { registerWithEmail, loginWithGoogle } from "@/lib/auth"
 import type { RegisterData, RegisterError } from "@/types/auth"
+import URLMapping from "@/utils/URLMapping"
+import { useAPI } from "@/hooks/useAPI"
+
 
 export function RegisterForm() {
   const [formData, setFormData] = useState<RegisterData>({
-    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -26,6 +28,7 @@ export function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<RegisterError | null>(null)
+  const { API } = useAPI();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -34,10 +37,6 @@ export function RegisterForm() {
   }
 
   const validateForm = (): boolean => {
-    if (!formData.name.trim()) {
-      setError({ field: "name", message: "Name is required" })
-      return false
-    }
     if (!formData.email) {
       setError({ field: "email", message: "Email is required" })
       return false
@@ -61,23 +60,15 @@ export function RegisterForm() {
     return true
   }
 
-  const handleEmailRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
 
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      await registerWithEmail(formData)
-    } catch (err) {
-      setError({
-        field: "general",
-        message: err instanceof Error ? err.message : "Registration failed. Please try again.",
-      })
-    } finally {
-      setIsLoading(false)
+   const registerWithEmail = async (): Promise<void> => {
+    const payload = {
+      email: formData.email,
+      password: formData.password,
     }
+
+    const response = await API.post(URLMapping.REGISTER,payload);
+    
   }
 
   const handleGoogleRegister = async () => {
@@ -137,7 +128,7 @@ export function RegisterForm() {
           </Alert>
         )}
 
-        <form onSubmit={handleEmailRegister} className="space-y-4">
+        <form onSubmit={() => registerWithEmail} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
               Email Address
@@ -151,9 +142,8 @@ export function RegisterForm() {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`pl-10 h-12 ${
-                  error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
+                className={`pl-10 h-12 ${error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 disabled={isLoading}
               />
             </div>
@@ -178,9 +168,8 @@ export function RegisterForm() {
                 placeholder="Create a password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`pl-10 pr-10 h-12 ${
-                  error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
+                className={`pl-10 pr-10 h-12 ${error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 disabled={isLoading}
               />
               <button
@@ -213,9 +202,8 @@ export function RegisterForm() {
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className={`pl-10 pr-10 h-12 ${
-                  error?.field === "confirmPassword" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
+                className={`pl-10 pr-10 h-12 ${error?.field === "confirmPassword" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 disabled={isLoading}
               />
               <button

@@ -13,38 +13,38 @@ export function Features() {
   const features: Feature[] = [
     {
       icon: <BookOpen className="h-8 w-8" />,
-      title: "Interactive Lessons",
-      description: "Learn through engaging, bite-sized lessons designed by Japanese language experts.",
+      title: "Bài học tương tác",
+      description: "Học thông qua các bài học hấp dẫn, ngắn gọn được thiết kế bởi các chuyên gia tiếng Nhật.",
       color: "text-blue-600 bg-blue-100",
     },
     {
       icon: <Headphones className="h-8 w-8" />,
-      title: "Audio Pronunciation",
-      description: "Perfect your pronunciation with native speaker audio and speech recognition.",
+      title: "Phát âm bằng âm thanh",
+      description: "Hoàn thiện cách phát âm của bạn với công nghệ nhận dạng giọng nói và âm thanh của người bản xứ.",
       color: "text-green-600 bg-green-100",
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,
-      title: "Conversation Practice",
-      description: "Practice real conversations with AI tutors and native Japanese speakers.",
+      title: "Thực hành đàm thoại",
+      description: "Thực hành các cuộc trò chuyện thực tế với gia sư AI và người bản ngữ Nhật Bản.",
       color: "text-purple-600 bg-purple-100",
     },
     {
       icon: <Brain className="h-8 w-8" />,
-      title: "Spaced Repetition",
-      description: "Optimize your learning with scientifically-proven spaced repetition system.",
+      title: "Lặp lại cách quãng",
+      description: "Tối ưu hóa việc học của bạn với hệ thống lặp lại giãn cách đã được chứng minh khoa học.",
       color: "text-orange-600 bg-orange-100",
     },
     {
       icon: <Target className="h-8 w-8" />,
-      title: "Personalized Path",
-      description: "Get a customized learning path based on your goals and current level.",
+      title: "Đường dẫn cá nhân",
+      description: "Nhận lộ trình học tập tùy chỉnh dựa trên mục tiêu và trình độ hiện tại của bạn.",
       color: "text-red-600 bg-red-100",
     },
     {
       icon: <Trophy className="h-8 w-8" />,
-      title: "Progress Tracking",
-      description: "Track your progress with detailed analytics and achievement badges.",
+      title: "Theo dõi tiến trình",
+      description: "Theo dõi tiến trình của bạn với phân tích chi tiết và huy hiệu thành tích.",
       color: "text-yellow-600 bg-yellow-100",
     },
   ]
@@ -53,9 +53,9 @@ export function Features() {
     <section className="py-20 bg-gray-50">
       <div className="container">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Why Choose Our Platform?</h2>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Tại sao nên chọn nền tảng của chúng tôi?</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Experience the most effective way to learn Japanese with our innovative features
+            Trải nghiệm cách học tiếng Nhật hiệu quả nhất với các tính năng cải tiến của chúng tôi
           </p>
         </div>
 

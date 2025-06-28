@@ -2,5 +2,5 @@
 export { useAuth } from "./useAuth"
 export { useLocalStorage } from "./useLocalStorage"
 export { useDebounce } from "./useDebounce"
-export { useApi } from "./useAPI"
+export { useAPI } from "./useAPI"
 export { useTheme } from "./useTheme"
