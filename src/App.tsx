@@ -12,6 +12,8 @@ import Dashboard from './app/Admin/Dashboard';
 import StaffViewListCourse from './app/Staff/ViewListCourse';
 import AddNewCourse from './app/Staff/AddNewCourse';
 import ViewCourseDetail from './app/Staff/CourseDetail';
+import AddNewChapter from './app/Staff/AddNewChapter';
+import AddNewUnit from './app/Staff/AddNewUnit';
 
 function App() {
   const isAuthenticated = false;
@@ -32,6 +34,8 @@ function App() {
       <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
       <Route path="/addnew" element={<AddNewCourse />} />
       <Route path="/coursedetail" element={<ViewCourseDetail />} />
+      <Route path="/addchapter" element={<AddNewChapter />} />
+      <Route path="/addunit" element={<AddNewUnit />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )

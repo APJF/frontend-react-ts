@@ -21,6 +21,7 @@ import {
   Target,
 } from "lucide-react"
 import type { Subject } from "../entity"
+import { useNavigate } from "react-router-dom"
 
 interface CourseDetailLayoutPageProps {
   course: Subject
@@ -29,6 +30,7 @@ interface CourseDetailLayoutPageProps {
 
 export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPageProps) {
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set([1]))
+  const navigate = useNavigate();
 
   const toggleChapter = (chapterId: number) => {
     const newExpanded = new Set(expandedChapters)
@@ -86,7 +88,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={onBack} className="p-2 hover:bg-blue-100 text-blue-600 rounded-full">
+              <Button variant="ghost" onClick={()=> window.history.back()} className="p-2 hover:bg-blue-100 text-blue-600 rounded-full">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex items-center text-sm text-blue-600">
@@ -98,7 +100,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+              <Button onClick={ ()=> navigate(`/addchapter`)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm chương
               </Button>
@@ -261,10 +263,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                             size="sm"
                             variant="outline"
                             className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Handle add lesson
-                            }}
+                            onClick={() => navigate(`/addunit`) }
                           >
                             <Plus className="h-4 w-4 mr-1" />
                             Thêm bài học
@@ -307,7 +306,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                                 </div>
                                 <p className="text-blue-600 font-medium mb-2">Chưa có bài học nào</p>
                                 <p className="text-sm text-blue-500 mb-4">Thêm bài học đầu tiên cho chương này</p>
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button  onClick={() => navigate(`/addunit`) } size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                                   <Plus className="h-4 w-4 mr-2" />
                                   Thêm bài học
                                 </Button>

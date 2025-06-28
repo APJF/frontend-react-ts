@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import AutoLayout from "@/components/layout/AutoLayout";
-import { CourseDetailPage } from "@/components/sections/staff/course-detail-page";
 import type { Subject } from "@/components/sections/entity";
 import { CourseDetailLayoutPage } from "@/components/sections/staff/course-detail-layout-page";
 

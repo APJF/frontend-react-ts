@@ -1,11 +1,6 @@
 import AutoLayout from "@/components/layout/AutoLayout";
-import { AddChapterPage } from "@/components/sections/staff/add-chapter-page";
-import { Subject } from "@/components/sections/entity";
-
-interface AddChapterPagePorps {
-  course: Subject
-  onBack: () => void
-}
+import { AddLessonPage } from "@/components/sections/staff/add-unit-page";
+import { Subject,Chapter } from "@/components/sections/entity";
 
 const testSubject: Subject = {
   id: 1,
@@ -31,18 +26,8 @@ const testSubject: Subject = {
       updatedAt: new Date().toISOString(),
       lessonCount: 3,
       duration: "1 giờ 30 phút",
-    },
-    {
-      id: 2,
-      title: "Giới thiệu CSS",
-      description: "Cách làm đẹp trang web với CSS",
-      orderNumber: 2,
-      subjectId: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lessonCount: 4,
-      duration: "2 giờ",
     }
+
   ],
   studentCount: 150,
   lessonCount: 7,
@@ -50,18 +35,23 @@ const testSubject: Subject = {
 }
 
 
+interface AddLessonPageProps {
+  course: Subject
+  chapter: Chapter   // 👈 chỉ nhận 1 chương, không phải mảng
+}
 
-const AddNewChapter: React.FC = () => {
+
+const AddNewUnit: React.FC = () => {
 
   return (
     <AutoLayout>
-      <AddChapterPage course={testSubject} onBack={function (): void {
+      <AddLessonPage course={testSubject} chapter={testSubject.chapters[0]} onBack={function (): void {
               throw new Error("Function not implemented.");
-          } } onCreateChapter={function (chapterData: { title: string; description: string; orderNumber: number; subjectId: number; }): void {
+          } } onCreateLesson={function (lessonData: { title: string; orderNumber: number; chapterId: number; materials: Array<{ type: string; name: string; description: string; file?: File; }>; }): void {
               throw new Error("Function not implemented.");
           } }/>
     </AutoLayout>
   );
 };
 
-export default AddNewChapter;
+export default AddNewUnit;
