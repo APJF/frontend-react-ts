@@ -106,7 +106,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     onCreateCourse(courseData)
   }
 
-  const isFormValid = formData.title && formData.description && formData.level && formData.estimatedDuration
+  const isFormValid = formData.title && formData.description && formData.level
 
   return (
     <div className="min-h-screen bg-blue-50">
@@ -195,20 +195,6 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
               {/* Duration and Level */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="duration" className="text-sm font-medium text-blue-800 mb-2 block">
-                    Thời gian học dự kiến <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="duration"
-                    value={formData.estimatedDuration}
-                    onChange={(e) => handleInputChange("estimatedDuration", e.target.value)}
-                    placeholder="Ví dụ: 120 giờ"
-                    className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
                   <Label className="text-sm font-medium text-blue-800 mb-2 block">
                     Mức độ <span className="text-red-500">*</span>
                   </Label>
@@ -225,21 +211,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              {/* Instructor */}
-              <div>
-                <Label htmlFor="instructor" className="text-sm font-medium text-blue-800 mb-2 block">
-                  Giảng viên
-                </Label>
-                <Input
-                  id="instructor"
-                  value={formData.creatorId}
-                  onChange={(e) => handleInputChange("creatorId", e.target.value)}
-                  placeholder="Tên giảng viên"
-                  className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
+              </div>      
             </div>
           </div>
 

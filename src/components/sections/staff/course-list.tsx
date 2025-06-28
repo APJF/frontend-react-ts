@@ -201,7 +201,7 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => navigate(`/coursedetail`, { state: { course } })}
+                      onClick={() => navigate(`/detail/${course.id}`, { state: { course } })}
                       className="h-8 w-8 p-0 hover:bg-blue-600 hover:text-white transition-colors"
                     >
                       <Eye className="h-4 w-4" />

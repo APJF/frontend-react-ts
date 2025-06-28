@@ -33,9 +33,9 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
       <Route path="/addnew" element={<AddNewCourse />} />
-      <Route path="/coursedetail" element={<ViewCourseDetail />} />
-      <Route path="/addchapter" element={<AddNewChapter />} />
-      <Route path="/addunit" element={<AddNewUnit />} />
+      <Route path="/detail/:courseId" element={<ViewCourseDetail />} />
+      <Route path="/addchapter/:courseId" element={<AddNewChapter />} />
+      <Route path="/addunit/:courseId/:chapterId" element={<AddNewUnit />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )

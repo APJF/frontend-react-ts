@@ -1,67 +1,64 @@
 import AutoLayout from "@/components/layout/AutoLayout";
 import { AddChapterPage } from "@/components/sections/staff/add-chapter-page";
-import { Subject } from "@/components/sections/entity";
-
-interface AddChapterPagePorps {
-  course: Subject
-  onBack: () => void
-}
-
-const testSubject: Subject = {
-  id: 1,
-  title: "Lập trình Web cơ bản",
-  topic: "Web Development",
-  description: "Khóa học này hướng dẫn bạn các kiến thức cơ bản về lập trình web.",
-  level: "Beginner",
-  estimatedDuration: "10 giờ",
-  creatorId: "user123",
-  image: "https://via.placeholder.com/150",
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  status: "published",
-  orderNumber: 1,
-  chapters: [
-    {
-      id: 1,
-      title: "Giới thiệu HTML",
-      description: "Tìm hiểu HTML cơ bản",
-      orderNumber: 1,
-      subjectId: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lessonCount: 3,
-      duration: "1 giờ 30 phút",
-    },
-    {
-      id: 2,
-      title: "Giới thiệu CSS",
-      description: "Cách làm đẹp trang web với CSS",
-      orderNumber: 2,
-      subjectId: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lessonCount: 4,
-      duration: "2 giờ",
-    }
-  ],
-  studentCount: 150,
-  lessonCount: 7,
-  rating: 4.8,
-}
-
-
+import { CreateChapterDTO, Subject } from "@/components/sections/entity";
+import { useAPI } from "@/hooks";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import URLMapping from "@/utils/URLMapping";
 
 const AddNewChapter: React.FC = () => {
+  const { API } = useAPI();
+  const navigate = useNavigate();
+  const { courseId } = useParams();
+  const [course, setCourse] = useState<Subject | null>(null);
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  return (
-    <AutoLayout>
-      <AddChapterPage course={testSubject} onBack={function (): void {
-              throw new Error("Function not implemented.");
-          } } onCreateChapter={function (chapterData: { title: string; description: string; orderNumber: number; subjectId: number; }): void {
-              throw new Error("Function not implemented.");
-          } }/>
-    </AutoLayout>
-  );
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (!course && courseId) {
+          const response = await API.get(URLMapping.SUBJECT_DETAIL + `/${courseId}`);
+          setCourse(response); // Gán course lấy từ API
+        }
+      } catch (err) {
+        setError("Không thể tải dữ liệu khóa học.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [course, courseId]);
+
+  const handleBack = () => {
+    navigate(-1); // hoặc navigate(`/admin/subjects/${subjectId}`);
+  };
+
+  const handleCreateChapter = async (chapterData: CreateChapterDTO) => {
+    try {
+      console.log("Dữ liệu tạo chapter:", chapterData);
+      const response = await API.post(URLMapping.CHAPTER_CREATE, chapterData);
+      navigate(`/detail/${courseId}`, { state: { course } }); // quay lại chi tiết subject
+    } catch (error) {
+      console.error("Tạo chương thất bại:", error);
+      alert("Tạo chương thất bại.");
+    }
+  };
+
+  if (!course) {
+    return <p>Đang tải thông tin môn học...</p>;
+  } else {
+    return (
+      <AutoLayout>
+        <AddChapterPage
+          course={course}
+          onBack={handleBack}
+          onCreateChapter={handleCreateChapter}
+        />
+      </AutoLayout>
+    );
+  }
+
 };
 
 export default AddNewChapter;

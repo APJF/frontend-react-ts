@@ -1,5 +1,5 @@
 const API_URL =
-  (import.meta.env.VITE_API_URL as string) || "http://localhost:8080/api/users";
+  (import.meta.env.VITE_API_URL as string) || "http://localhost:8082";
 const AI_API_URL = "http://localhost:8085"; // 👉 Thêm URL của hệ thống AI
 
 const URLMapping = {
@@ -17,6 +17,15 @@ const URLMapping = {
   SUBJECT_CREATE: "/subjects/create",
   SLOT_SKILL: "/slots/detail",
   MATERIAL: "/materials/slot",
+
+  // Chapter APIs
+  CHAPTER_CREATE:"/chapters/create",
+
+  // Unit APIs
+  UNIT_CREATE: "/slots/create",
+
+  // Material APIs
+  MATERIAL_CREATE:"/materials/create",
 
   // 👉 AI APIs (cổng 8085)
   AI_CHAT_INVOKE: `${AI_API_URL}/chat/invoke`,

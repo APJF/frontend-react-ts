@@ -10,17 +10,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, BookOpen, Info, Sparkles, Plus, Hash } from "lucide-react"
-import type { Subject } from "../entity"
+import type { Chapter, CreateChapterDTO, Subject } from "../entity"
 
 interface AddChapterPageProps {
   course: Subject
   onBack: () => void
-  onCreateChapter: (chapterData: {
-    title: string
-    description: string
-    orderNumber: number
-    subjectId: number
-  }) => void
+  onCreateChapter: (chapterData: CreateChapterDTO) => void
 }
 
 export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPageProps) {
@@ -38,7 +33,7 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
     e.preventDefault()
     onCreateChapter({
       ...formData,
-      subjectId: course.id,
+      subject: course,
     })
   }
 
@@ -100,7 +95,7 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                   <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-blue-600 font-medium text-sm">ID Khóa học</span>
-                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.topic}</Badge>
+                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.id}</Badge>
                     </div>
                   </div>
 

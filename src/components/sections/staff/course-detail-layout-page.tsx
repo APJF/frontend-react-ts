@@ -42,45 +42,6 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
     setExpandedChapters(newExpanded)
   }
 
-  // Sample chapter data based on the image
-  const sampleChapters = [
-    {
-      id: 1,
-      title: "Hiragana - Bảng chữ cái cơ bản",
-      lessonCount: 8,
-      duration: "15 giờ",
-      lessons: ["Slot 1: Từ vựng chữ cái chính", "Slot 2: Ngữ pháp nền tảng", "Slot 3: Bài đọc ngắn"],
-    },
-    {
-      id: 2,
-      title: "Katakana - Bảng chữ cái người lại",
-      lessonCount: 8,
-      duration: "15 giờ",
-      lessons: [],
-    },
-    {
-      id: 3,
-      title: "Kanji cơ bản N5",
-      lessonCount: 12,
-      duration: "25 giờ",
-      lessons: [],
-    },
-    {
-      id: 4,
-      title: "Ngữ pháp N5",
-      lessonCount: 15,
-      duration: "30 giờ",
-      lessons: [],
-    },
-    {
-      id: 5,
-      title: "Từ vựng và Giao tiếp N5",
-      lessonCount: 10,
-      duration: "20 giờ",
-      lessons: [],
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Header */}
@@ -100,7 +61,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={ ()=> navigate(`/addchapter`)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+              <Button onClick={ ()=> navigate(`/addchapter/${course.id}`)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm chương
               </Button>
@@ -199,10 +160,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                   <div className="w-16 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"></div>
                 </div>
                 <p className="text-blue-700 leading-relaxed text-lg">
-                  Khóa học tiếng Nhật N5 dành cho người mới bắt đầu, giúp bạn nắm vững các kiến thức cơ bản nhất của
-                  tiếng Nhật như Hiragana, Katakana, 100 chữ Kanji cơ bản, và các cấu trúc ngữ pháp cơ bản. Khóa học
-                  được thiết kế để thân thiện với người mới học, tuyệt vời để chuẩn bị cho kỳ thi năng lực tiếng Nhật
-                  N5.
+                  {course.description}
                 </p>
               </CardContent>
             </Card>
@@ -221,17 +179,17 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-blue-600 font-medium">
-                        {sampleChapters.length} chương • {course.estimatedDuration}
+                        {course.chapters?.length} chương • {course.estimatedDuration}
                       </div>
-                      <div className="text-xs text-blue-500">
-                        {sampleChapters.reduce((total, chapter) => total + chapter.lessonCount, 0)} bài học
-                      </div>
+                      {/* <div className="text-xs text-blue-500">
+                        {course.chapters.reduce((total, chapter) => total + chapter.lessonCount, 0)} bài học
+                      </div> */}
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {sampleChapters.map((chapter, index) => (
+                  {course.chapters?.map((chapter, index) => (
                     <div
                       key={chapter.id}
                       className="border border-blue-200 rounded-xl hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-blue-50/30"
@@ -247,14 +205,14 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                           <div>
                             <h3 className="font-semibold text-blue-900 text-lg mb-1">{chapter.title}</h3>
                             <div className="flex items-center gap-4 text-sm text-blue-600">
-                              <div className="flex items-center gap-1">
+                              {/* <div className="flex items-center gap-1">
                                 <Play className="h-4 w-4" />
                                 <span>{chapter.lessonCount} bài học</span>
-                              </div>
-                              <div className="flex items-center gap-1">
+                              </div> */}
+                              {/* <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
-                                <span>{chapter.duration}</span>
-                              </div>
+                                <span>{chapter.}</span>
+                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -263,7 +221,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                             size="sm"
                             variant="outline"
                             className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
-                            onClick={() => navigate(`/addunit`) }
+                            onClick={() => navigate(`/addunit/${course.id}/${chapter.id}`) }
                           >
                             <Plus className="h-4 w-4 mr-1" />
                             Thêm bài học
@@ -279,8 +237,8 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                       {expandedChapters.has(chapter.id) && (
                         <div className="border-t border-blue-200 bg-blue-50/30">
                           <div className="p-6 space-y-3">
-                            {chapter.lessons.length > 0 ? (
-                              chapter.lessons.map((lesson, lessonIndex) => (
+                            {chapter.slots.length > 0 ? (
+                              chapter.slots.map((lesson, lessonIndex) => (
                                 <div
                                   key={lessonIndex}
                                   className="flex items-center gap-3 py-3 px-4 bg-white rounded-lg border border-blue-100 hover:shadow-md transition-all"
@@ -288,7 +246,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                                   <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                                     <span className="text-xs text-white font-medium">{lessonIndex + 1}</span>
                                   </div>
-                                  <span className="text-blue-700 font-medium">{lesson}</span>
+                                  <span className="text-blue-700 font-medium">{lesson.title}</span>
                                   <div className="ml-auto flex items-center gap-2">
                                     <Badge variant="outline" className="text-xs border-blue-300 text-blue-600">
                                       5 phút
@@ -306,10 +264,6 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                                 </div>
                                 <p className="text-blue-600 font-medium mb-2">Chưa có bài học nào</p>
                                 <p className="text-sm text-blue-500 mb-4">Thêm bài học đầu tiên cho chương này</p>
-                                <Button  onClick={() => navigate(`/addunit`) } size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Thêm bài học
-                                </Button>
                               </div>
                             )}
                           </div>
@@ -317,14 +271,6 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                       )}
                     </div>
                   ))}
-                </div>
-
-                {/* Add New Chapter Button */}
-                <div className="mt-8 pt-6 border-t border-blue-200">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 text-lg font-medium shadow-lg">
-                    <Plus className="h-5 w-5 mr-2" />
-                    Thêm chương mới
-                  </Button>
                 </div>
               </CardContent>
             </Card>

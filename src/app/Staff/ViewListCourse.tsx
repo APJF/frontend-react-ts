@@ -1,330 +1,53 @@
-import AutoLayout from "@/components/layout/AutoLayout";
-import { CourseListPage } from "@/components/sections/staff/course-list";
-import { Subject } from "../../components/sections/entity";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react"
+import { Subject } from "@/components/sections/entity"
+import { useNavigate } from "react-router-dom"
+import AutoLayout from "@/components/layout/AutoLayout"
+import { CourseListPage } from "@/components/sections/staff/course-list"
+import { useAPI } from "@/hooks"
+import URLMapping from "@/utils/URLMapping"
 
-const sampleCourses: Subject[] = [
-  {
-    id: 1,
-    title: "Tiếng Nhật N1 - Nâng cao",
-    topic: "JP008",
-    description: "Khóa học tiếng Nhật N1 cho học viên có trình độ cao, chuẩn bị cho kỳ thi JLPT N1.",
-    level: "N1",
-    estimatedDuration: "200 giờ",
-    creatorId: "Kobayashi Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-20T15:30:00Z",
-    status: "Hoạt động",
-    orderNumber: 1,
-    chapters: [
-      {
-        id: 1,
-        title: "Ngữ pháp N1 nâng cao",
-        description: "Các cấu trúc ngữ pháp phức tạp nhất",
-        orderNumber: 1,
-        subjectId: 1,
-        createdAt: "2024-01-15T10:00:00Z",
-        updatedAt: "2024-01-15T10:00:00Z",
-        lessonCount: 20,
-        duration: "50 giờ",
-      },
-    ],
-    studentCount: 1200,
-    lessonCount: 60,
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    title: "Tiếng Nhật N3 - Trung cấp",
-    topic: "JP004",
-    description: "Khóa học tiếng Nhật N3 cho học viên trung cấp, nâng cao kỹ năng giao tiếp.",
-    level: "N3",
-    estimatedDuration: "150 giờ",
-    creatorId: "Sato Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-10T09:00:00Z",
-    updatedAt: "2024-01-18T14:20:00Z",
-    status: "Tạm dừng",
-    orderNumber: 2,
-    chapters: [
-      {
-        id: 2,
-        title: "Ngữ pháp N3",
-        description: "Các cấu trúc ngữ pháp trung cấp",
-        orderNumber: 1,
-        subjectId: 2,
-        createdAt: "2024-01-10T09:00:00Z",
-        updatedAt: "2024-01-10T09:00:00Z",
-        lessonCount: 15,
-        duration: "40 giờ",
-      },
-    ],
-    studentCount: 850,
-    lessonCount: 45,
-    rating: 4.6,
-  },
-  {
-    id: 3,
-    title: "Hiragana và Katakana từ A-Z",
-    topic: "JP005",
-    description: "Khóa học cơ bản về hai bảng chữ cái Hiragana và Katakana cho người mới bắt đầu.",
-    level: "Cơ bản",
-    estimatedDuration: "30 giờ",
-    creatorId: "Watanabe Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-05T08:00:00Z",
-    updatedAt: "2024-01-15T12:00:00Z",
-    status: "Hoạt động",
-    orderNumber: 3,
-    chapters: [
-      {
-        id: 3,
-        title: "Hiragana cơ bản",
-        description: "46 ký tự Hiragana cơ bản",
-        orderNumber: 1,
-        subjectId: 3,
-        createdAt: "2024-01-05T08:00:00Z",
-        updatedAt: "2024-01-05T08:00:00Z",
-        lessonCount: 8,
-        duration: "15 giờ",
-      },
-    ],
-    studentCount: 3200,
-    lessonCount: 20,
-    rating: 4.9,
-  },
-  {
-    id: 4,
-    title: "Tiếng Nhật N4 - Sơ cấp",
-    topic: "JP002",
-    description: "Khóa học tiếng Nhật N4 cho học viên đã hoàn thành N5, tiếp tục nâng cao kiến thức.",
-    level: "N4",
-    estimatedDuration: "120 giờ",
-    creatorId: "Yamada Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-08T10:30:00Z",
-    updatedAt: "2024-01-22T16:45:00Z",
-    status: "Hoạt động",
-    orderNumber: 4,
-    chapters: [
-      {
-        id: 4,
-        title: "Ngữ pháp N4",
-        description: "Các cấu trúc ngữ pháp N4",
-        orderNumber: 1,
-        subjectId: 4,
-        createdAt: "2024-01-08T10:30:00Z",
-        updatedAt: "2024-01-08T10:30:00Z",
-        lessonCount: 12,
-        duration: "30 giờ",
-      },
-    ],
-    studentCount: 1850,
-    lessonCount: 38,
-    rating: 4.7,
-  },
-  {
-    id: 5,
-    title: "Tiếng Nhật N2 - Trung cao cấp",
-    topic: "JP007",
-    description: "Khóa học tiếng Nhật N2 cho học viên có trình độ trung cao cấp.",
-    level: "N2",
-    estimatedDuration: "180 giờ",
-    creatorId: "Ito Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-12T11:00:00Z",
-    updatedAt: "2024-01-25T09:15:00Z",
-    status: "Nhập",
-    orderNumber: 5,
-    chapters: [
-      {
-        id: 5,
-        title: "Ngữ pháp N2",
-        description: "Các cấu trúc ngữ pháp N2 phức tạp",
-        orderNumber: 1,
-        subjectId: 5,
-        createdAt: "2024-01-12T11:00:00Z",
-        updatedAt: "2024-01-12T11:00:00Z",
-        lessonCount: 18,
-        duration: "45 giờ",
-      },
-    ],
-    studentCount: 920,
-    lessonCount: 52,
-    rating: 4.5,
-  },
-  {
-    id: 6,
-    title: "Kanji cơ bản cho người mới",
-    topic: "JP003",
-    description: "Học 100 chữ Kanji cơ bản nhất trong tiếng Nhật.",
-    level: "Cơ bản",
-    estimatedDuration: "40 giờ",
-    creatorId: "Tanaka Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-03T09:30:00Z",
-    updatedAt: "2024-01-20T14:00:00Z",
-    status: "Hoạt động",
-    orderNumber: 6,
-    chapters: [
-      {
-        id: 6,
-        title: "100 Kanji cơ bản",
-        description: "Học viết và đọc 100 chữ Kanji đầu tiên",
-        orderNumber: 1,
-        subjectId: 6,
-        createdAt: "2024-01-03T09:30:00Z",
-        updatedAt: "2024-01-03T09:30:00Z",
-        lessonCount: 10,
-        duration: "25 giờ",
-      },
-    ],
-    studentCount: 2100,
-    lessonCount: 25,
-    rating: 4.8,
-  },
-  {
-    id: 7,
-    title: "Giao tiếp tiếng Nhật hàng ngày",
-    topic: "JP006",
-    description: "Khóa học tập trung vào giao tiếp tiếng Nhật trong cuộc sống hàng ngày.",
-    level: "N4",
-    estimatedDuration: "80 giờ",
-    creatorId: "Suzuki Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-07T13:15:00Z",
-    updatedAt: "2024-01-21T10:30:00Z",
-    status: "Tạm dừng",
-    orderNumber: 7,
-    chapters: [
-      {
-        id: 7,
-        title: "Giao tiếp cơ bản",
-        description: "Các tình huống giao tiếp thường gặp",
-        orderNumber: 1,
-        subjectId: 7,
-        createdAt: "2024-01-07T13:15:00Z",
-        updatedAt: "2024-01-07T13:15:00Z",
-        lessonCount: 12,
-        duration: "30 giờ",
-      },
-    ],
-    studentCount: 1450,
-    lessonCount: 32,
-    rating: 4.6,
-  },
-  {
-    id: 8,
-    title: "Tiếng Nhật thương mại",
-    topic: "JP009",
-    description: "Khóa học tiếng Nhật chuyên ngành thương mại và kinh doanh.",
-    level: "N2",
-    estimatedDuration: "100 giờ",
-    creatorId: "Nakamura Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-14T15:45:00Z",
-    updatedAt: "2024-01-24T11:20:00Z",
-    status: "Nhập",
-    orderNumber: 8,
-    chapters: [
-      {
-        id: 8,
-        title: "Tiếng Nhật văn phòng",
-        description: "Từ vựng và cách giao tiếp trong môi trường làm việc",
-        orderNumber: 1,
-        subjectId: 8,
-        createdAt: "2024-01-14T15:45:00Z",
-        updatedAt: "2024-01-14T15:45:00Z",
-        lessonCount: 15,
-        duration: "40 giờ",
-      },
-    ],
-    studentCount: 680,
-    lessonCount: 35,
-    rating: 4.4,
-  },
-  {
-    id: 9,
-    title: "Luyện thi JLPT N5",
-    topic: "JP001",
-    description: "Khóa học luyện thi chuyên sâu cho kỳ thi JLPT N5.",
-    level: "N5",
-    estimatedDuration: "60 giờ",
-    creatorId: "Kimura Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-01T08:00:00Z",
-    updatedAt: "2024-01-19T16:30:00Z",
-    status: "Hoạt động",
-    orderNumber: 9,
-    chapters: [
-      {
-        id: 9,
-        title: "Đề thi thử N5",
-        description: "Luyện tập với các đề thi thử",
-        orderNumber: 1,
-        subjectId: 9,
-        createdAt: "2024-01-01T08:00:00Z",
-        updatedAt: "2024-01-01T08:00:00Z",
-        lessonCount: 8,
-        duration: "20 giờ",
-      },
-    ],
-    studentCount: 2850,
-    lessonCount: 28,
-    rating: 4.9,
-  },
-  {
-    id: 10,
-    title: "Văn hóa Nhật Bản qua ngôn ngữ",
-    topic: "JP010",
-    description: "Tìm hiểu văn hóa Nhật Bản thông qua việc học tiếng Nhật.",
-    level: "N3",
-    estimatedDuration: "90 giờ",
-    creatorId: "Hayashi Sensei",
-    image: "/placeholder.svg?height=200&width=300",
-    createdAt: "2024-01-16T12:30:00Z",
-    updatedAt: "2024-01-26T14:45:00Z",
-    status: "Hoạt động",
-    orderNumber: 10,
-    chapters: [
-      {
-        id: 10,
-        title: "Lễ hội và truyền thống",
-        description: "Tìm hiểu các lễ hội truyền thống Nhật Bản",
-        orderNumber: 1,
-        subjectId: 10,
-        createdAt: "2024-01-16T12:30:00Z",
-        updatedAt: "2024-01-16T12:30:00Z",
-        lessonCount: 12,
-        duration: "30 giờ",
-      },
-    ],
-    studentCount: 1320,
-    lessonCount: 36,
-    rating: 4.7,
-  },
-];
+const Dashboard = () => {
+  const { API } = useAPI();
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const [japaneseCourses, setJapaneseCourses] = useState<any[]>([]);
 
-const Dashboard: React.FC = () => {
-  const navigate= useNavigate();
-    const handleViewDetails = (course: Subject) => {
-    navigate(`/coursedetail`);
-  };
+  const handleViewDetails = (course: Subject) => {
+    navigate(`/coursedetail`, { state: { course } })
+  }
 
-  const handleAddCourse = () => {
-    console.log("Thêm khóa học mới");
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await API.get(URLMapping.LIST_SUBJECT);
+        setJapaneseCourses(response.content);
+        setLoading(false);
+      } catch (err: any) {
+        setError("Không thể tải dữ liệu khóa học.");
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [API]);
 
   return (
     <AutoLayout>
-      <CourseListPage
-              courses={sampleCourses}
-              onViewDetails={handleViewDetails}
-              onAddCourse={handleAddCourse}
-            />
+      {loading ? (
+        <div className="text-center text-blue-500">Đang tải dữ liệu...</div>
+      ) : error ? (
+        <div className="text-center text-red-500">Lỗi: {error}</div>
+      ) : (
+        <CourseListPage
+          courses={japaneseCourses}
+          onViewDetails={handleViewDetails}
+          onAddCourse={() => {
+            console.log("Chức năng thêm khóa học chưa được triển khai.");
+          }}
+        />
+      )}
     </AutoLayout>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

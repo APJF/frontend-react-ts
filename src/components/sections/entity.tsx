@@ -1,16 +1,50 @@
-export interface Chapter {
+export type MaterialType = {
+  id: number
+  name: string
+}
+
+export type Material = {
   id: number
   title: string
   description: string
-  orderNumber: number
-  subjectId: number
+  fileUrl: string
+  uploaderId: number
   createdAt: string
   updatedAt: string
-  lessonCount: number
-  duration: string
+  type: MaterialType
 }
 
-export interface Subject {
+export type Slot = {
+  id: number
+  title: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
+  materials: Material[]
+}
+
+export type Chapter = {
+  id: number
+  title: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  orderNumber: number
+  slots: Slot[]
+  subjectId: number
+}
+
+export interface CreateChapterDTO {
+  id?: number; // optional nếu là tạo mới
+  title: string;
+  description: string;
+  orderNumber: number;
+  subject: Subject; // chính là object có id
+}
+
+
+export type Subject = {
   id: number
   title: string
   topic: string
@@ -24,32 +58,4 @@ export interface Subject {
   status: string
   orderNumber: number
   chapters: Chapter[]
-  studentCount: number
-  lessonCount: number
-  rating: number
-}
-
-export interface Slot {
-  id: number
-  title: string
-  description: string
-  orderNumber: number
-  chapterId: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface Material {
-  id: number
-  title: string
-  description: string
-  fileUrl: string
-  imgUrl: string
-  type: string
-  status: string
-  uploaderId: string
-  subjectId: number
-  createdAt: string
-  updatedAt: string
-  subject: Subject
 }
