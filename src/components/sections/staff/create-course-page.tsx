@@ -24,7 +24,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     estimatedDuration: "",
     creatorId: "",
     image: "",
-    status: "Nhập",
+    status: "Pending",
     orderNumber: 1,
   })
 

@@ -5,34 +5,31 @@ export type MaterialType = {
 
 export type Material = {
   id: number
-  title: string
   description: string
   fileUrl: string
   uploaderId: number
   createdAt: string
   updatedAt: string
   type: MaterialType
+  unitId: number
 }
 
-export type Slot = {
+export type Unit = {
   id: number
   title: string
   description: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
+  prerequisite: number
   materials: Material[]
+  chapterId: number
 }
 
 export type Chapter = {
   id: number
   title: string
   description: string
-  createdAt: string
-  updatedAt: string
-  orderNumber: number
-  slots: Slot[]
-  subjectId: number
+  prerequisite: number
+  slots: Unit[]
+  coursetId: number
 }
 
 export interface CreateChapterDTO {
@@ -40,11 +37,11 @@ export interface CreateChapterDTO {
   title: string;
   description: string;
   orderNumber: number;
-  subject: Subject; // chính là object có id
+  course: Course; // chính là object có id
 }
 
 
-export type Subject = {
+export type Course = {
   id: number
   title: string
   topic: string
@@ -53,9 +50,8 @@ export type Subject = {
   estimatedDuration: string
   creatorId: string
   image: string
-  createdAt: string
-  updatedAt: string
   status: string
-  orderNumber: number
+  prerequisite: number
+  requirement:string
   chapters: Chapter[]
 }

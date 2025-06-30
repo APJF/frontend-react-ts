@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Plus, Search } from "lucide-react"
+import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react"
 import type { Subject } from "../entity"
 import { useNavigate } from "react-router-dom"
 
@@ -78,6 +78,10 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
       default:
         return "bg-gray-100 text-gray-800"
     }
+  }
+
+  function handleEditCourse(course: Subject): void {
+    throw new Error("Function not implemented.")
   }
 
   return (
@@ -164,11 +168,11 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
           <div className="bg-blue-600 text-white">
             <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium">
               <div className="col-span-1">STT</div>
-              <div className="col-span-1">ID</div>
-              <div className="col-span-4">Tên khóa học</div>
+              <div className="col-span-2">ID</div>
+              <div className="col-span-3">Tên khóa học</div>
               <div className="col-span-2">Mức độ</div>
-              <div className="col-span-3">Trạng thái</div>
-              <div className="col-span-1">Xem chi tiết</div>
+              <div className="col-span-2">Trạng thái</div>
+              <div className="col-span-2">Xem chi tiết</div>
             </div>
           </div>
 
@@ -186,18 +190,18 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
               currentCourses.map((course, index) => (
                 <div key={course.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-blue-50 transition-colors">
                   <div className="col-span-1 text-sm text-blue-900 font-medium">{startIndex + index + 1}</div>
-                  <div className="col-span-1 text-sm font-bold text-blue-700">{course.topic}</div>
-                  <div className="col-span-4">
+                  <div className="col-span-2 text-sm font-bold text-blue-700">{course.topic}</div>
+                  <div className="col-span-3">
                     <div className="text-sm font-medium text-blue-900">{course.title}</div>
                   </div>
                   <div className="col-span-2">
                     <Badge className={`${getLevelColor(course.level)} text-xs font-medium`}>{course.level}</Badge>
                   </div>
                   {/* <div className="col-span-2 text-sm text-blue-700 font-medium">{course.creatorId}</div> */}
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <Badge className={`${getStatusColor(course.status)} text-xs font-medium`}>{course.status}</Badge>
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -206,6 +210,23 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditCourse(course)}
+                        className="h-8 w-8 p-0 hover:bg-green-600 hover:text-white transition-colors"
+                        title="Chỉnh sửa"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        // onClick={() => handleDeleteCourse(course.id)}
+                        className="h-8 w-8 p-0 hover:bg-red-600 hover:text-white transition-colors"
+                        title="Xóa"
+                      >  <Trash2 className="h-4 w-4" />
+                      </Button>
                   </div>
                 </div>
               ))

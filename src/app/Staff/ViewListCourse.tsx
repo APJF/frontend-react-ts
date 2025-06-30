@@ -41,9 +41,7 @@ const Dashboard = () => {
         <CourseListPage
           courses={japaneseCourses}
           onViewDetails={handleViewDetails}
-          onAddCourse={() => {
-            console.log("Chức năng thêm khóa học chưa được triển khai.");
-          }}
+          onAddCourse={() => {}}
         />
       )}
     </AutoLayout>

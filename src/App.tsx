@@ -14,6 +14,7 @@ import AddNewCourse from './app/Staff/AddNewCourse';
 import ViewCourseDetail from './app/Staff/CourseDetail';
 import AddNewChapter from './app/Staff/AddNewChapter';
 import AddNewUnit from './app/Staff/AddNewUnit';
+import { FeedbackManagerPage } from './components/sections/staff/feedback-manager-page';
 
 function App() {
   const isAuthenticated = false;
@@ -36,6 +37,7 @@ function App() {
       <Route path="/detail/:courseId" element={<ViewCourseDetail />} />
       <Route path="/addchapter/:courseId" element={<AddNewChapter />} />
       <Route path="/addunit/:courseId/:chapterId" element={<AddNewUnit />} />
+      <Route path="/feedback" element={<FeedbackManagerPage />} />
       <Route path="*" element={<HomePage />} />
     </Routes>
   )
