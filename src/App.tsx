@@ -2,14 +2,20 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './app/Authentication/LoginPage';
 import RegisterPage from './app/Authentication/RegisterPage';
 import CourseListPage from './app/Common/CourseListPage'
-import CourseDetail from './components/sections/course-detail';
+import CourseDetail from './components/sections/common/course-detail';
 import HomePage from './app/page';
 import ChatbotPage from './app/Common/ChatBot';
-import SlotSkills from './components/sections/slot-skills';
-import Vocabulary from './components/sections/vocabulary';
-import CMSStaffInterface from './app/Staff/add-new-subject';
-import JapaneseLearningPage from './components/sections/japanese-learning-page';
-import ManagerApproveStaffRequestPage from'./app/Manager/approve-staff-request';
+import SlotSkills from './components/sections/common/slot-skills';
+import Vocabulary from './components/sections/common/vocabulary';
+import JapaneseLearningPage from './components/sections/common/japanese-learning-page';
+import Dashboard from './app/Admin/Dashboard';
+import StaffViewListCourse from './app/Staff/ViewListCourse';
+import AddNewCourse from './app/Staff/AddNewCourse';
+import ViewCourseDetail from './app/Staff/CourseDetail';
+import ManagerApprovalInterface from './app/Manager/ApproveStaffRequest';
+import ViewRequestFeedback from './app/Staff/ViewRequestFeedback'
+import Test from './app/Common/TestPage'
+import TestHistory from "./app/Common/TestHistory"
 
 function App() {
   const isAuthenticated = false;
@@ -25,10 +31,16 @@ function App() {
       <Route path="/chatbot" element={<ChatbotPage />} />
       <Route path="/slot/:id" element={<SlotSkills />} />
       <Route path="/vocabulary" element={<Vocabulary />} />
-      <Route path="/newsubject" element={<CMSStaffInterface />} />
       <Route path="/materials/slot/:id" element={<JapaneseLearningPage />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
+      <Route path="/addnew" element={<AddNewCourse />} />
+      <Route path="/coursedetail" element={<ViewCourseDetail />} />
       <Route path="*" element={<HomePage />} />
-      <Route path="/manager/request" element={<ManagerApproveStaffRequestPage />} />
+      <Route path="/manager/request" element={<Dashboard />} />
+      <Route path="/staff/viewrequestfeedback" element={<ViewRequestFeedback />} />
+      <Route path="/test" element={<Test />} />
+      <Route path="/test/history" element={<TestHistory />} />
 
     </Routes>
   )

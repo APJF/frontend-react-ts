@@ -1,4 +1,4 @@
-import JapaneseCourseList from "@/components/sections/japanese-course-list"
+import JapaneseCourseList from "@/components/sections/common/japanese-course-list"
 import { Header } from "@/components/layout/header"
 
 export default function Page() {

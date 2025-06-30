@@ -33,7 +33,7 @@ export function useAPI() {
         options.body = data instanceof FormData ? data : JSON.stringify(data);
       }
 
-      const response = await fetch(`${API_URL}/${url}`, options);
+      const response = await fetch(`${API_URL}/api/${url}`, options);
 
       if (!response.ok) {
         return handleErrorResponse(response, showToast);
