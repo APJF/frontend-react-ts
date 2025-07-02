@@ -12,10 +12,15 @@ import Dashboard from './app/Admin/Dashboard';
 import StaffViewListCourse from './app/Staff/ViewListCourse';
 import AddNewCourse from './app/Staff/AddNewCourse';
 import ViewCourseDetail from './app/Staff/CourseDetail';
+<<<<<<< HEAD
 import ManagerApprovalInterface from './app/Manager/ApproveStaffRequest';
 import ViewRequestFeedback from './app/Staff/ViewRequestFeedback'
 import Test from './app/Common/TestPage'
 import TestHistory from "./app/Common/TestHistory"
+=======
+import AddNewChapter from './app/Staff/AddNewChapter';
+import AddNewUnit from './app/Staff/AddNewUnit';
+>>>>>>> 5742fdebedd01c7f5eb3e746e4387c482dbcd367
 
 function App() {
   const isAuthenticated = false;
@@ -36,6 +41,8 @@ function App() {
       <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
       <Route path="/addnew" element={<AddNewCourse />} />
       <Route path="/coursedetail" element={<ViewCourseDetail />} />
+      <Route path="/addchapter" element={<AddNewChapter />} />
+      <Route path="/addunit" element={<AddNewUnit />} />
       <Route path="*" element={<HomePage />} />
       <Route path="/manager/request" element={<Dashboard />} />
       <Route path="/staff/viewrequestfeedback" element={<ViewRequestFeedback />} />

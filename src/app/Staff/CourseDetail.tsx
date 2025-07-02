@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import AutoLayout from "@/components/layout/AutoLayout";
-import { CourseDetailPage } from "@/components/sections/staff/course-detail-page";
 import type { Subject } from "@/components/sections/entity";
+import { CourseDetailLayoutPage } from "@/components/sections/staff/course-detail-layout-page";
 
 const ViewCourseDetail: React.FC = () => {
   const location = useLocation();
@@ -23,7 +23,7 @@ const ViewCourseDetail: React.FC = () => {
 
   return (
     <AutoLayout>
-      <CourseDetailPage course={course} onBack={() => navigate(-1)} />
+      <CourseDetailLayoutPage course={course} onBack={() => navigate(-1)} />
     </AutoLayout>
   );
 };
