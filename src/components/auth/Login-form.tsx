@@ -26,8 +26,8 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<LoginError | null>(null)
-   const { API } = useAPI();
-    const navigate = useNavigate();
+  const { API } = useAPI();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -62,8 +62,13 @@ export function LoginForm() {
       password: formData.password,
     }
 
-    const response = await API.post(URLMapping.LOGIN,payload);
-    if(response.success){
+    const response = await API.post(URLMapping.LOGIN, payload);
+    if (response.success) {
+      const { jwtToken, username } = response.data;
+
+      // Lưu token và user info
+      localStorage.setItem("token", jwtToken);
+      localStorage.setItem("user", JSON.stringify({ username }));
       navigate(`/home`);
     }
   }
@@ -144,9 +149,8 @@ export function LoginForm() {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`pl-10 h-12 ${
-                  error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
+                className={`pl-10 h-12 ${error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 disabled={isLoading}
               />
             </div>
@@ -171,9 +175,8 @@ export function LoginForm() {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`pl-10 pr-10 h-12 ${
-                  error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                }`}
+                className={`pl-10 pr-10 h-12 ${error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                  }`}
                 disabled={isLoading}
               />
               <button
@@ -210,7 +213,7 @@ export function LoginForm() {
           </div>
 
           <Button
-            type ="button" onClick={handleEmailLogin}
+            type="button" onClick={handleEmailLogin}
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-medium"
             disabled={isLoading}
           >

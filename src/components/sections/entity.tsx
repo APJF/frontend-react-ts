@@ -2,6 +2,10 @@ export type MaterialType = {
   id: number
   name: string
 }
+export type user = {
+  email: string
+  avatar: string
+}
 
 export type Material = {
   id: number

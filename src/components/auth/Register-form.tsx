@@ -16,6 +16,7 @@ import { registerWithEmail, loginWithGoogle } from "@/lib/auth"
 import type { RegisterData, RegisterError } from "@/types/auth"
 import URLMapping from "@/utils/URLMapping"
 import { useAPI } from "@/hooks/useAPI"
+import { useNavigate } from "react-router-dom"
 
 
 export function RegisterForm() {
@@ -29,6 +30,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<RegisterError | null>(null)
   const { API } = useAPI();
+  const navigate= useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -68,7 +70,11 @@ export function RegisterForm() {
     }
 
     const response = await API.post(URLMapping.REGISTER,payload);
-    
+    if(response.success){
+      const email= response.data;
+      localStorage.setItem("email", email);
+      navigate(`/verify`);
+    }
   }
 
   const handleGoogleRegister = async () => {

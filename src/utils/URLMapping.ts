@@ -1,15 +1,14 @@
 const API_URL =
-  (import.meta.env.VITE_API_URL as string) || "http://localhost:8082";
-const AI_API_URL = "http://localhost:8085"; // 👉 Thêm URL của hệ thống AI
+ (import.meta.env.VITE_API_URL as string) || "http://localhost:8080";
 
 const URLMapping = {
   // User APIs
-  LOGIN: "/login",
-  REGISTER: "/register",
-  VEFIRY: "/active-account",
+  LOGIN: "users/login",
+  REGISTER: "users/register",
+  VEFIRY: "users/active-account",
   OAUTH_GOOGLE: `${API_URL}/auth/google`,
-  FORGOT_PASSWORD: "/forgot-password",
-  RESET_PASSWORD: "/reset-password",
+  FORGOT_PASSWORD: "users/forgot-password",
+  RESET_PASSWORD: "users/reset-password",
 
   // Subject APIs
   LIST_SUBJECT: "/subjects/list",
@@ -28,10 +27,10 @@ const URLMapping = {
   MATERIAL_CREATE:"/materials/create",
 
   // 👉 AI APIs (cổng 8085)
-  AI_CHAT_INVOKE: `${AI_API_URL}/chat/invoke`,
-  AI_SESSION_CREATE: `${AI_API_URL}/sessions`,
-  AI_SESSION_BY_USER: (userId: string) => `${AI_API_URL}/sessions/user/${userId}`,
-  AI_SESSION_DELETE: (sessionId: string) => `${AI_API_URL}/sessions/${sessionId}`,
+  AI_CHAT_INVOKE: `/chat/invoke`,
+  AI_SESSION_CREATE: `/sessions`,
+  AI_SESSION_BY_USER: (userId: string) => `/sessions/user/${userId}`,
+  AI_SESSION_DELETE: (sessionId: string) => `/sessions/${sessionId}`,
 };
 
 export default URLMapping;

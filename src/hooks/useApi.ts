@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useMemo } from "react"; // <-- thêm dòng này
+import { useMemo } from "react";
 import { API_URL } from "@/utils/URLMapping";
 
 export function useAPI() {
@@ -15,17 +15,20 @@ export function useAPI() {
     ): Promise<any> => {
       url = url.startsWith("/") ? url.slice(1) : url;
 
-      const headers: any = {
-        ...(!(data instanceof FormData) && { 'Content-Type': 'application/json' }),
+      const token = localStorage.getItem("token");
+
+      const headers: Record<string, string> = {
+        ...(data instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
       try {
         const options: RequestInit = {
           method,
-          headers
+          headers,
         };
 
-        if (method !== 'GET' && method !== 'DELETE') {
+        if (method !== "GET" && method !== "DELETE") {
           options.body = data instanceof FormData ? data : JSON.stringify(data);
         }
 
@@ -55,10 +58,10 @@ export function useAPI() {
           message = response?.statusText || "Error";
         }
 
-        switch (status) {
-          case 401:
-            navigate("/login");
-            break;
+        if (status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
         }
 
         responseData.success = false;
@@ -83,7 +86,7 @@ export function useAPI() {
       delete: (url: string, data: any = {}, showToast = true, showLoading = true) =>
         request("DELETE", url, data, showToast, showLoading),
     };
-  }, [navigate]); // <- chỉ tạo lại khi navigate thay đổi
+  }, [navigate]);
 
   return { API };
 }
