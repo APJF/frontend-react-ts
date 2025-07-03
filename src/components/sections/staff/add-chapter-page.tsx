@@ -16,33 +16,38 @@ interface AddChapterPageProps {
   course: Subject
   onBack: () => void
   onCreateChapter: (chapterData: {
+    chapterId: string
     title: string
     description: string
-    orderNumber: number
+    prerequisiteChapter: string
     subjectId: number
   }) => void
 }
 
 export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPageProps) {
   const [formData, setFormData] = useState({
+    chapterId: "",
     title: "",
     description: "",
-    orderNumber: (course.chapters?.length || 0) + 1,
+    prerequisiteChapter: "",
   })
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onCreateChapter({
-      ...formData,
+      chapterId: formData.chapterId,
+      title: formData.title,
+      description: formData.description,
+      prerequisiteChapter: formData.prerequisiteChapter,
       subjectId: course.id,
     })
   }
 
-  const isFormValid = formData.title.trim() && formData.description.trim()
+  const isFormValid = formData.chapterId.trim() && formData.title.trim() && formData.description.trim()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -155,6 +160,23 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Chapter ID */}
+                  <div className="space-y-3">
+                    <Label htmlFor="chapterId" className="text-blue-800 font-semibold text-base flex items-center gap-2">
+                      Mã chương <span className="text-red-500">*</span>
+                      <div className="bg-blue-100 p-1 rounded-full">
+                        <Hash className="h-3 w-3 text-blue-600" />
+                      </div>
+                    </Label>
+                    <Input
+                      id="chapterId"
+                      value={formData.chapterId}
+                      onChange={(e) => handleInputChange("chapterId", e.target.value)}
+                      placeholder="Ví dụ: CHAP01"
+                      className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 bg-white/80 backdrop-blur-sm"
+                      required
+                    />
+                  </div>
                   {/* Chapter Name */}
                   <div className="space-y-3">
                     <Label htmlFor="title" className="text-blue-800 font-semibold text-base flex items-center gap-2">
@@ -173,7 +195,6 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                     />
                     <p className="text-blue-600 text-xs">Nhập tên chương rõ ràng và dễ hiểu cho học viên</p>
                   </div>
-
                   {/* Chapter Description */}
                   <div className="space-y-3">
                     <Label
@@ -198,31 +219,22 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                       Mô tả nội dung, mục tiêu học tập và những gì học viên sẽ đạt được
                     </p>
                   </div>
-
-                  {/* Order Number */}
+                  {/* Prerequisite Chapter */}
                   <div className="space-y-3">
-                    <Label htmlFor="order" className="text-blue-800 font-semibold text-base flex items-center gap-2">
-                      Thứ tự học <span className="text-red-500">*</span>
+                    <Label htmlFor="prerequisiteChapter" className="text-blue-800 font-semibold text-base flex items-center gap-2">
+                      Chương tiên quyết (nếu có)
                       <div className="bg-blue-100 p-1 rounded-full">
                         <Hash className="h-3 w-3 text-blue-600" />
                       </div>
                     </Label>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        id="order"
-                        type="number"
-                        min="1"
-                        value={formData.orderNumber}
-                        onChange={(e) => handleInputChange("orderNumber", Number.parseInt(e.target.value) || 1)}
-                        className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 w-32 bg-white/80 backdrop-blur-sm font-mono text-center"
-                        required
-                      />
-                      <div className="flex-1 bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <p className="text-blue-700 text-sm font-medium">
-                          Chương sẽ được sắp xếp theo thứ tự này trong khóa học
-                        </p>
-                      </div>
-                    </div>
+                    <Input
+                      id="prerequisiteChapter"
+                      value={formData.prerequisiteChapter}
+                      onChange={(e) => handleInputChange("prerequisiteChapter", e.target.value)}
+                      placeholder="Ví dụ: CHAP00"
+                      className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 bg-white/80 backdrop-blur-sm"
+                    />
+                    <p className="text-blue-600 text-xs">Nhập mã chương tiên quyết nếu chương này cần học trước</p>
                   </div>
 
                   {/* Action Buttons */}

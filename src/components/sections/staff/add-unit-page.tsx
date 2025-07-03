@@ -30,55 +30,58 @@ import {
   Target,
   Award,
 } from "lucide-react"
-import type { Subject,Chapter } from "../entity"
+import type { Subject, Chapter } from "../entity"
 
 interface AddLessonPageProps {
   course: Subject
   chapter: Chapter
   onBack: () => void
   onCreateLesson: (lessonData: {
-    title: string
-    orderNumber: number
+    unitId: string
+    unitDescription: string
+    prerequisiteUnit: string
     chapterId: number
     materials: Array<{
-      type: string
+      skill: string
       name: string
       description: string
-      file?: File
+      url: string
     }>
   }) => void
 }
 
 export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLessonPageProps) {
   const [formData, setFormData] = useState({
+    unitId: "",
     title: "",
-    orderNumber: 9, // Next lesson number
+    unitDescription: "",
+    prerequisiteUnit: "",
   })
 
   const [materials, setMaterials] = useState([
     {
       id: 1,
-      type: "",
+      skill: "",
       name: "",
       description: "",
-      file: null as File | null,
+      url: "",
       expanded: true,
     },
   ])
 
-  const materialTypes = [
-    { value: "pdf", label: "Tài liệu PDF", icon: FileText },
-    { value: "video", label: "Video bài giảng", icon: Video },
-    { value: "audio", label: "File âm thanh", icon: Headphones },
-    { value: "image", label: "Hình ảnh", icon: ImageIcon },
-    { value: "presentation", label: "Bài thuyết trình", icon: BookOpen },
+  const skillTypes = [
+    { value: "vocabulary", label: "Từ vựng" },
+    { value: "kanji", label: "Kanji" },
+    { value: "grammar", label: "Ngữ pháp" },
+    { value: "reading", label: "Đọc hiểu" },
+    { value: "listening", label: "Nghe hiểu" },
   ]
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleMaterialChange = (id: number, field: string, value: string | File | null) => {
+  const handleMaterialChange = (id: number, field: string, value: string) => {
     setMaterials((prev) => prev.map((material) => (material.id === id ? { ...material, [field]: value } : material)))
   }
 
@@ -88,10 +91,10 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
       ...prev,
       {
         id: newId,
-        type: "",
+        skill: "",
         name: "",
         description: "",
-        file: null,
+        url: "",
         expanded: true,
       },
     ])
@@ -109,25 +112,11 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
     )
   }
 
-  const handleFileSelect = (id: number, file: File | null) => {
-    handleMaterialChange(id, "file", file)
-  }
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault()
-//     onCreateLesson({
-//       ...formData,
-//       chapterId: chapter.id,
-//       materials: materials.map(({ id, expanded, ...material }) => material),
-//     })
-//   }
-
-  const isFormValid = formData.title.trim() && materials.every((m) => m.type && m.name.trim())
-
-  const getTypeIcon = (type: string) => {
-    const materialType = materialTypes.find((t) => t.value === type)
-    return materialType ? materialType.icon : FileText
-  }
+  const isFormValid =
+    formData.unitId.trim() &&
+    formData.title.trim() &&
+    formData.unitDescription.trim() &&
+    materials.every((m) => m.skill && m.name.trim() && m.url.trim())
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -255,7 +244,19 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
 
           {/* Main Content - Form */}
           <div className="lg:col-span-2">
-            <form className="space-y-8">
+            <form
+              className="space-y-8"
+              onSubmit={(e) => {
+                e.preventDefault()
+                onCreateLesson({
+                  unitId: formData.unitId,
+                  unitDescription: formData.unitDescription,
+                  prerequisiteUnit: formData.prerequisiteUnit,
+                  chapterId: chapter.id,
+                  materials: materials.map(({ id, expanded, ...material }) => material),
+                })
+              }}
+            >
               {/* Lesson Information */}
               <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-8">
@@ -270,7 +271,21 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Lesson Name */}
+                    {/* Unit ID */}
+                    <div className="space-y-3">
+                      <Label htmlFor="unitId" className="text-blue-800 font-semibold text-base flex items-center gap-2">
+                        Mã bài học <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="unitId"
+                        value={formData.unitId}
+                        onChange={(e) => handleInputChange("unitId", e.target.value)}
+                        placeholder="Ví dụ: UNIT01"
+                        className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 bg-white/80 backdrop-blur-sm"
+                        required
+                      />
+                    </div>
+                    {/* Unit Name */}
                     <div className="space-y-3">
                       <Label htmlFor="title" className="text-blue-800 font-semibold text-base flex items-center gap-2">
                         Tên bài học <span className="text-red-500">*</span>
@@ -287,25 +302,34 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                         required
                       />
                     </div>
-
-                    {/* Lesson Order */}
-                    <div className="space-y-3">
-                      <Label htmlFor="order" className="text-blue-800 font-semibold text-base flex items-center gap-2">
-                        Thứ tự học <span className="text-red-500">*</span>
-                        <div className="bg-blue-100 p-1 rounded-full">
-                          <Hash className="h-3 w-3 text-blue-600" />
-                        </div>
-                      </Label>
-                      <Input
-                        id="order"
-                        type="number"
-                        min="1"
-                        value={formData.orderNumber}
-                        onChange={(e) => handleInputChange("orderNumber", Number.parseInt(e.target.value) || 1)}
-                        className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 w-full bg-white/80 backdrop-blur-sm font-mono text-center"
-                        required
-                      />
-                    </div>
+                  </div>
+                  {/* Unit Description */}
+                  <div className="space-y-3 mt-6">
+                    <Label htmlFor="unitDescription" className="text-blue-800 font-semibold text-base flex items-center gap-2">
+                      Mô tả bài học <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="unitDescription"
+                      value={formData.unitDescription}
+                      onChange={(e) => handleInputChange("unitDescription", e.target.value)}
+                      placeholder="Mô tả chi tiết về nội dung bài học..."
+                      rows={3}
+                      className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 resize-none"
+                      required
+                    />
+                  </div>
+                  {/* Prerequisite Unit */}
+                  <div className="space-y-3 mt-6">
+                    <Label htmlFor="prerequisiteUnit" className="text-blue-800 font-semibold text-base flex items-center gap-2">
+                      Bài học tiên quyết
+                    </Label>
+                    <Input
+                      id="prerequisiteUnit"
+                      value={formData.prerequisiteUnit}
+                      onChange={(e) => handleInputChange("prerequisiteUnit", e.target.value)}
+                      placeholder="Nhập mã bài học tiên quyết (nếu có)"
+                      className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-base py-3 bg-white/80 backdrop-blur-sm"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -319,7 +343,7 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                         <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-2 rounded-lg">
                           <FileText className="h-6 w-6 text-white" />
                         </div>
-                        <h2 className="text-xl font-bold text-blue-900">Tài liệu bài học</h2>
+                        <h2 className="text-xl font-bold text-blue-900">Kỹ năng trong bài học</h2>
                       </div>
                       <Button
                         type="button"
@@ -328,168 +352,129 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                         className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Thêm tài liệu
+                        Thêm kỹ năng
                       </Button>
                     </div>
                     <div className="w-16 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"></div>
                   </div>
 
                   <div className="space-y-4">
-                    {materials.map((material, index) => {
-                      const IconComponent = getTypeIcon(material.type)
-                      return (
-                        <div
-                          key={material.id}
-                          className="border border-purple-200 rounded-xl bg-gradient-to-r from-white to-purple-50/30"
-                        >
-                          <Collapsible open={material.expanded} onOpenChange={() => toggleMaterial(material.id)}>
-                            <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-purple-50/50 transition-colors rounded-xl">
-                              <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-br from-purple-600 to-pink-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
-                                  {index + 1}
-                                </div>
-                                <div className="text-left">
-                                  <h3 className="font-semibold text-purple-900">
-                                    Tài liệu {index + 1}
-                                    {material.name && ` - ${material.name}`}
-                                  </h3>
-                                  {material.type && (
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <IconComponent className="h-4 w-4 text-purple-600" />
-                                      <span className="text-sm text-purple-600">
-                                        {materialTypes.find((t) => t.value === material.type)?.label}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
+                    {materials.map((material, index) => (
+                      <div
+                        key={material.id}
+                        className="border border-purple-200 rounded-xl bg-gradient-to-r from-white to-purple-50/30"
+                      >
+                        <Collapsible open={material.expanded} onOpenChange={() => toggleMaterial(material.id)}>
+                          <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-purple-50/50 transition-colors rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gradient-to-br from-purple-600 to-pink-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                                {index + 1}
                               </div>
-                              <div className="flex items-center gap-2">
-                                {materials.length > 1 && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      removeMaterial(material.id)
-                                    }}
-                                    className="h-8 w-8 p-0 text-red-500 hover:bg-red-50"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                )}
-                                {material.expanded ? (
-                                  <ChevronDown className="h-5 w-5 text-purple-400" />
-                                ) : (
-                                  <ChevronRight className="h-5 w-5 text-purple-400" />
-                                )}
-                              </div>
-                            </CollapsibleTrigger>
-
-                            <CollapsibleContent className="border-t border-purple-200 bg-purple-50/30">
-                              <div className="p-6 space-y-6">
-                                {/* Material Type */}
-                                <div className="space-y-2">
-                                  <Label className="text-purple-800 font-medium">
-                                    Loại tài liệu <span className="text-red-500">*</span>
-                                  </Label>
-                                  <Select
-                                    value={material.type}
-                                    onValueChange={(value) => handleMaterialChange(material.id, "type", value)}
-                                  >
-                                    <SelectTrigger className="border-purple-300 focus:border-purple-500 focus:ring-purple-500">
-                                      <SelectValue placeholder="Chọn loại tài liệu" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {materialTypes.map((type) => (
-                                        <SelectItem key={type.value} value={type.value}>
-                                          <div className="flex items-center gap-2">
-                                            <type.icon className="h-4 w-4" />
-                                            {type.label}
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                {/* Material Name */}
-                                <div className="space-y-2">
-                                  <Label className="text-purple-800 font-medium">
-                                    Tên tài liệu <span className="text-red-500">*</span>
-                                  </Label>
-                                  <Input
-                                    value={material.name}
-                                    onChange={(e) => handleMaterialChange(material.id, "name", e.target.value)}
-                                    placeholder="Ví dụ: Bảng Hiragana cơ bản"
-                                    className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
-                                    required
-                                  />
-                                </div>
-
-                                {/* Material Description */}
-                                <div className="space-y-2">
-                                  <Label className="text-purple-800 font-medium">Mô tả tài liệu</Label>
-                                  <Textarea
-                                    value={material.description}
-                                    onChange={(e) => handleMaterialChange(material.id, "description", e.target.value)}
-                                    placeholder="Mô tả chi tiết về nội dung và mục tiêu của tài liệu..."
-                                    rows={3}
-                                    className="border-purple-300 focus:border-purple-500 focus:ring-purple-500 resize-none"
-                                  />
-                                </div>
-
-                                {/* File Upload */}
-                                <div className="space-y-2">
-                                  <Label className="text-purple-800 font-medium">File PDF</Label>
-                                  <div className="border-2 border-dashed border-purple-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
-                                    {material.file ? (
-                                      <div className="space-y-2">
-                                        <FileText className="h-8 w-8 text-purple-600 mx-auto" />
-                                        <p className="text-sm font-medium text-purple-700">{material.file.name}</p>
-                                        <p className="text-xs text-purple-500">
-                                          {(material.file.size / 1024 / 1024).toFixed(2)} MB
-                                        </p>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => handleFileSelect(material.id, null)}
-                                          className="text-red-600 border-red-300 hover:bg-red-50"
-                                        >
-                                          Xóa file
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <div className="space-y-2">
-                                        <Upload className="h-8 w-8 text-purple-400 mx-auto" />
-                                        <p className="text-sm text-purple-600 font-medium">Tải lên file PDF</p>
-                                        <p className="text-xs text-purple-500">Chỉ nhận file PDF, tối đa 10MB</p>
-                                        <label htmlFor={`file-${material.id}`} className="cursor-pointer">
-                                          <span className="text-sm text-purple-600 hover:text-purple-700 font-medium underline">
-                                            Choose File
-                                          </span>
-                                          <input
-                                            id={`file-${material.id}`}
-                                            type="file"
-                                            className="hidden"
-                                            accept=".pdf"
-                                            onChange={(e) => {
-                                              const file = e.target.files?.[0] || null
-                                              handleFileSelect(material.id, file)
-                                            }}
-                                          />
-                                        </label>
-                                      </div>
-                                    )}
+                              <div className="text-left">
+                                <h3 className="font-semibold text-purple-900">
+                                  Kỹ năng {index + 1}
+                                  {material.name && ` - ${material.name}`}
+                                </h3>
+                                {material.skill && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-sm text-purple-600">
+                                      {skillTypes.find((t) => t.value === material.skill)?.label}
+                                    </span>
                                   </div>
-                                </div>
+                                )}
                               </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </div>
-                      )
-                    })}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {materials.length > 1 && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    removeMaterial(material.id)
+                                  }}
+                                  className="h-8 w-8 p-0 text-red-500 hover:bg-red-50"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {material.expanded ? (
+                                <ChevronDown className="h-5 w-5 text-purple-400" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-purple-400" />
+                              )}
+                            </div>
+                          </CollapsibleTrigger>
+
+                          <CollapsibleContent className="border-t border-purple-200 bg-purple-50/30">
+                            <div className="p-6 space-y-6">
+                              {/* Skill Type */}
+                              <div className="space-y-2">
+                                <Label className="text-purple-800 font-medium">
+                                  Kỹ năng <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                  value={material.skill}
+                                  onValueChange={(value) => handleMaterialChange(material.id, "skill", value)}
+                                >
+                                  <SelectTrigger className="border-purple-300 focus:border-purple-500 focus:ring-purple-500 bg-white">
+                                    <SelectValue placeholder="Chọn kỹ năng" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-white">
+                                    {skillTypes.map((type) => (
+                                      <SelectItem key={type.value} value={type.value} className="bg-white">
+                                        {type.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Material Name */}
+                              <div className="space-y-2">
+                                <Label className="text-purple-800 font-medium">
+                                  Tên tài liệu <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  value={material.name}
+                                  onChange={(e) => handleMaterialChange(material.id, "name", e.target.value)}
+                                  placeholder="Ví dụ: Bảng Hiragana cơ bản"
+                                  className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                                  required
+                                />
+                              </div>
+
+                              {/* Material Description */}
+                              <div className="space-y-2">
+                                <Label className="text-purple-800 font-medium">Mô tả tài liệu</Label>
+                                <Textarea
+                                  value={material.description}
+                                  onChange={(e) => handleMaterialChange(material.id, "description", e.target.value)}
+                                  placeholder="Mô tả chi tiết về nội dung và mục tiêu của tài liệu..."
+                                  rows={3}
+                                  className="border-purple-300 focus:border-purple-500 focus:ring-purple-500 resize-none"
+                                />
+                              </div>
+
+                              {/* Material URL */}
+                              <div className="space-y-2">
+                                <Label className="text-purple-800 font-medium">
+                                  URL tài liệu <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                  value={material.url}
+                                  onChange={(e) => handleMaterialChange(material.id, "url", e.target.value)}
+                                  placeholder="Dán URL tài liệu (Google Drive, v.v.)"
+                                  className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                                  required
+                                />
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

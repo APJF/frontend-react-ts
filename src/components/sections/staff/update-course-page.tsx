@@ -1,42 +1,36 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Upload } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
 import type { Subject } from "../entity"
-interface CreateCourseData {
-  id: string;
-  title: string;
-  description: string;
-  estimatedDuration: string;
-  level: string;
-  image: string;
-  requirement: string;
-  prerequisite: string;
+
+interface UpdateCoursePageProps {
+  onBack?: () => void
+  onUpdateCourse?: (courseData: any) => void
 }
 
-interface CreateCoursePageProps {
-  onBack: () => void
-  onCreateCourse: (courseData: CreateCourseData) => void
-}
+export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePageProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const course = (location.state && location.state.course) as Subject | undefined;
 
-export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePageProps) {
   const [formData, setFormData] = useState({
-    id: "",
-    title: "",
-    description: "",
-    estimatedDuration: "",
-    level: "",
-    image: "",
-    requirement: "",
-    prerequisite: "",
-  })
+    id: course?.id || "",
+    title: course?.title || "",
+    description: course?.description || "",
+    estimatedDuration: course?.estimatedDuration || "",
+    level: course?.level || "",
+    image: course?.image || "",
+    requirement: (course as any)?.requirement || "",
+    prerequisite: (course as any)?.prerequisiteCourse || (course as any)?.prerequisite || "",
+  });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
@@ -50,6 +44,21 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     { value: "N1", label: "N1" },
   ]
 
+  useEffect(() => {
+    if (course) {
+      setFormData({
+        id: course.id || "",
+        title: course.title || "",
+        description: course.description || "",
+        estimatedDuration: course.estimatedDuration || "",
+        level: course.level || "",
+        image: course.image || "",
+        requirement: (course as any)?.requirement || "",
+        prerequisite: (course as any)?.prerequisiteCourse || (course as any)?.prerequisite || "",
+      })
+    }
+  }, [course])
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
@@ -57,7 +66,6 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
   const handleFileSelect = (file: File) => {
     if (file && (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/gif")) {
       setSelectedFile(file)
-      // In a real app, you would upload the file and get a URL
       const imageUrl = URL.createObjectURL(file)
       setFormData((prev) => ({ ...prev, image: imageUrl }))
     }
@@ -77,7 +85,6 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileSelect(e.dataTransfer.files[0])
     }
@@ -101,7 +108,9 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
       requirement: formData.requirement || "",
       prerequisite: formData.prerequisite || ""
     }
-    onCreateCourse(courseData)
+    if (onUpdateCourse) onUpdateCourse(courseData)
+    // Sau khi update xong có thể điều hướng về trang chi tiết
+    navigate(-1)
   }
   const isFormValid = formData.id && formData.title && formData.description && formData.level && formData.estimatedDuration
 
@@ -111,12 +120,12 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
       <div className="bg-white border-b border-blue-200 shadow-sm">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={window.history.back} className="p-2 hover:bg-blue-100 text-blue-600">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="p-2 hover:bg-blue-100 text-blue-600">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-semibold text-blue-900">Tạo khóa học mới</h1>
-              <p className="text-sm text-blue-600">Thêm khóa học mới vào hệ thống</p>
+              <h1 className="text-xl font-semibold text-blue-900">Chỉnh sửa khóa học</h1>
+              <p className="text-sm text-blue-600">Cập nhật thông tin khóa học</p>
             </div>
           </div>
         </div>
@@ -307,7 +316,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
             <Button
               type="button"
               variant="outline"
-              onClick={onBack}
+              onClick={() => navigate(-1)}
               className="px-6 border-blue-300 text-blue-600 hover:bg-blue-50"
             >
               Hủy
@@ -317,7 +326,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
               disabled={!isFormValid}
               className="px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg"
             >
-              Tạo khóa học
+              Lưu thay đổi
             </Button>
           </div>
         </form>
@@ -325,3 +334,5 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     </div>
   )
 }
+
+export default UpdateCoursePage;

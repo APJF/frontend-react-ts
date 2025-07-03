@@ -12,15 +12,17 @@ import Dashboard from './app/Admin/Dashboard';
 import StaffViewListCourse from './app/Staff/ViewListCourse';
 import AddNewCourse from './app/Staff/AddNewCourse';
 import ViewCourseDetail from './app/Staff/CourseDetail';
-<<<<<<< HEAD
 import ManagerApprovalInterface from './app/Manager/ApproveStaffRequest';
 import ViewRequestFeedback from './app/Staff/ViewRequestFeedback'
 import Test from './app/Common/TestPage'
 import TestHistory from "./app/Common/TestHistory"
-=======
 import AddNewChapter from './app/Staff/AddNewChapter';
 import AddNewUnit from './app/Staff/AddNewUnit';
->>>>>>> 5742fdebedd01c7f5eb3e746e4387c482dbcd367
+import ChapterDetailPage from './app/Staff/ChapterDetail';
+import UnitDetailPage from './app/Staff/UnitDetail';
+import { UpdateCoursePage } from "@/components/sections/staff/update-course-page";
+import { UpdateChapterPage } from "@/components/sections/staff/update-chapter-page";
+import { UpdateUnitPage } from "@/components/sections/staff/update-unit-page";
 
 function App() {
   const isAuthenticated = false;
@@ -43,6 +45,11 @@ function App() {
       <Route path="/coursedetail" element={<ViewCourseDetail />} />
       <Route path="/addchapter" element={<AddNewChapter />} />
       <Route path="/addunit" element={<AddNewUnit />} />
+      <Route path="/chapterdetail" element={<ChapterDetailPage />} />
+      <Route path="/unitdetail" element={<UnitDetailPage />} />
+      <Route path="/updatecourse" element={<UpdateCoursePage />} />
+      <Route path="/updatechapter" element={<UpdateChapterPage />} />
+      <Route path="/updateunit" element={<UpdateUnitPage />} />
       <Route path="*" element={<HomePage />} />
       <Route path="/manager/request" element={<Dashboard />} />
       <Route path="/staff/viewrequestfeedback" element={<ViewRequestFeedback />} />

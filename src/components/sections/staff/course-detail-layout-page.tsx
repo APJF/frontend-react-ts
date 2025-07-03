@@ -81,6 +81,20 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
     },
   ]
 
+  // Bổ sung các trường cho course nếu thiếu
+  const courseWithInfo: any = {
+    ...course,
+    id: course.id || 'JPD111',
+    title: course.title || 'Tiếng Nhật sơ cấp N5',
+    topic: course.topic || 'Giao tiếp cơ bản',
+    description: course.description || 'Khóa học tiếng Nhật N5 dành cho người mới bắt đầu, giúp bạn nắm vững các kiến thức cơ bản nhất của tiếng Nhật như Hiragana, Katakana, 100 chữ Kanji cơ bản, và các cấu trúc ngữ pháp cơ bản.',
+    estimatedDuration: course.estimatedDuration || '60 giờ',
+    level: course.level || 'N5',
+    prerequisiteCourse: (course as any).prerequisiteCourse || '',
+    status: course.status || 'active',
+  };
+  const [status, setStatus] = useState<string>(courseWithInfo.status);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Header */}
@@ -104,13 +118,26 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm chương
               </Button>
-              <Button variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50 bg-transparent">
+              <Button variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50 bg-transparent"
+                onClick={() => navigate('/updatecourse', { state: { course: courseWithInfo } })}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Chỉnh sửa
               </Button>
-              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 bg-transparent">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Xóa
+              <Button
+                style={{
+                  backgroundColor: status === 'active' ? '#22c55e' : '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  boxShadow: status === 'active' ? '0 2px 8px #bbf7d0' : '0 2px 8px #fecaca',
+                }}
+                onClick={() => {
+                  const newStatus = status === 'active' ? 'deactive' : 'active';
+                  setStatus(newStatus);
+                  courseWithInfo.status = newStatus;
+                }}
+              >
+                {status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
               </Button>
             </div>
           </div>
@@ -131,12 +158,21 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                       <div className="text-sm">日本語</div>
                     </div>
                   </div>
-                  <h1 className="text-2xl font-bold text-blue-900 mb-2">{course.title}</h1>
-                  <p className="text-blue-600 font-medium">Tiếng Nhật cơ bản</p>
+                  <h1 className="text-2xl font-bold text-blue-900 mb-2">{courseWithInfo.title}</h1>
+                  <p className="text-blue-600 font-medium">{courseWithInfo.topic}</p>
                 </div>
+                <div className="space-y-2 text-left text-blue-900 text-base font-medium">
+                  <div><span className="font-semibold">Mã khóa học:</span> {courseWithInfo.id}</div>
+                  <div><span className="font-semibold">Tiêu đề:</span> {courseWithInfo.title}</div>
+                  <div><span className="font-semibold">Chủ đề:</span> {courseWithInfo.topic}</div>
+                  <div><span className="font-semibold">Level:</span> {courseWithInfo.level}</div>
+                  <div><span className="font-semibold">Thời gian hoàn thành:</span> {courseWithInfo.estimatedDuration}</div>
+                  <div><span className="font-semibold">Khóa học tiên quyết:</span> {courseWithInfo.prerequisiteCourse || 'Không có'}</div>
+                </div>
+                
 
                 {/* Stats Section */}
-                <div className="space-y-6">
+                <div className="space-y-6 mt-8">
                   <div className="border-b border-blue-100 pb-4">
                     <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
                       <Target className="h-5 w-5 text-blue-600" />
@@ -198,12 +234,9 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                   </h2>
                   <div className="w-16 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"></div>
                 </div>
-                <p className="text-blue-700 leading-relaxed text-lg">
-                  Khóa học tiếng Nhật N5 dành cho người mới bắt đầu, giúp bạn nắm vững các kiến thức cơ bản nhất của
-                  tiếng Nhật như Hiragana, Katakana, 100 chữ Kanji cơ bản, và các cấu trúc ngữ pháp cơ bản. Khóa học
-                  được thiết kế để thân thiện với người mới học, tuyệt vời để chuẩn bị cho kỳ thi năng lực tiếng Nhật
-                  N5.
-                </p>
+                <div className="mt-4 text-blue-700 text-sm">
+                  <span className="font-semibold">Mô tả:</span> {courseWithInfo.description}
+                </div>
               </CardContent>
             </Card>
 
@@ -263,10 +296,25 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                             size="sm"
                             variant="outline"
                             className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
-                            onClick={() => navigate(`/addunit`) }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/addunit`)
+                            }}
                           >
                             <Plus className="h-4 w-4 mr-1" />
                             Thêm bài học
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/chapterdetail', { state: { chapter, course } });
+                            }}
+                          >
+                            <BookOpen className="h-4 w-4 mr-1" />
+                            Xem chi tiết
                           </Button>
                           {expandedChapters.has(chapter.id) ? (
                             <ChevronDown className="h-6 w-6 text-blue-400" />

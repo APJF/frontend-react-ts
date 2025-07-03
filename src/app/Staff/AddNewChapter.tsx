@@ -49,17 +49,21 @@ const testSubject: Subject = {
   rating: 4.8,
 }
 
-
-
 const AddNewChapter: React.FC = () => {
+  const handleCreateChapter = (chapterData: {
+    chapterId: string;
+    title: string;
+    description: string;
+    prerequisiteChapter: string;
+    subjectId: number;
+  }) => {
+    // Gửi dữ liệu lên API hoặc xử lý logic ở đây
+    console.log("Tạo chương mới:", chapterData);
+  };
 
   return (
     <AutoLayout>
-      <AddChapterPage course={testSubject} onBack={function (): void {
-              throw new Error("Function not implemented.");
-          } } onCreateChapter={function (chapterData: { title: string; description: string; orderNumber: number; subjectId: number; }): void {
-              throw new Error("Function not implemented.");
-          } }/>
+      <AddChapterPage course={testSubject} onBack={() => window.history.back()} onCreateChapter={handleCreateChapter} />
     </AutoLayout>
   );
 };

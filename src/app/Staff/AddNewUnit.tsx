@@ -42,14 +42,35 @@ interface AddLessonPageProps {
 
 
 const AddNewUnit: React.FC = () => {
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  const handleCreateLesson = (lessonData: {
+    unitId: string;
+    unitDescription: string;
+    prerequisiteUnit: string;
+    chapterId: number;
+    materials: Array<{
+      skill: string;
+      name: string;
+      description: string;
+      url: string;
+    }>;
+  }) => {
+    // Xử lý dữ liệu tạo unit mới ở đây (gọi API hoặc log ra console)
+    console.log('Tạo unit mới:', lessonData);
+    // Ví dụ: alert('Tạo unit thành công!');
+  };
 
   return (
     <AutoLayout>
-      <AddLessonPage course={testSubject} chapter={testSubject.chapters[0]} onBack={function (): void {
-              throw new Error("Function not implemented.");
-          } } onCreateLesson={function (lessonData: { title: string; orderNumber: number; chapterId: number; materials: Array<{ type: string; name: string; description: string; file?: File; }>; }): void {
-              throw new Error("Function not implemented.");
-          } }/>
+      <AddLessonPage
+        course={testSubject}
+        chapter={testSubject.chapters[0]}
+        onBack={handleBack}
+        onCreateLesson={handleCreateLesson}
+      />
     </AutoLayout>
   );
 };
