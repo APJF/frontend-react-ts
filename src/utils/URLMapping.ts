@@ -5,7 +5,7 @@ const URLMapping = {
   // User APIs
   LOGIN: "users/login",
   REGISTER: "users/register",
-  VEFIRY: "users/active-account",
+  VEFIRY: "users/verify",
   OAUTH_GOOGLE: `${API_URL}/auth/google`,
   FORGOT_PASSWORD: "users/forgot-password",
   RESET_PASSWORD: "users/reset-password",

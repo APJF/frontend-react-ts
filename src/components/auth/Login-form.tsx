@@ -28,6 +28,7 @@ export function LoginForm() {
   const [error, setError] = useState<LoginError | null>(null)
   const { API } = useAPI();
   const navigate = useNavigate();
+  const [message, setMessage] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -70,6 +71,10 @@ export function LoginForm() {
       localStorage.setItem("token", jwtToken);
       localStorage.setItem("user", JSON.stringify({ username }));
       navigate(`/home`);
+    }else{
+      const message= response.message;
+      console.log(message);
+      setMessage(message);
     }
   }
 
@@ -207,11 +212,13 @@ export function LoginForm() {
                 Remember me
               </Label>
             </div>
-            <Link to="/forgot-password" className="text-sm text-red-600 hover:text-red-700 font-medium">
-              Forgot password?
+            <Link to="/fogotpass" className="text-sm text-red-600 hover:text-red-700 font-medium">
+              Quên Mật Khẩu?
             </Link>
           </div>
-
+          <div style={{ color: "red" }}>
+            {message}
+          </div>
           <Button
             type="button" onClick={handleEmailLogin}
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-medium"

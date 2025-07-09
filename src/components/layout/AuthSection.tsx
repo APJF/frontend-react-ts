@@ -98,6 +98,17 @@ export function AuthSection() {
                             className="justify-start w-full text-left gap-2"
                             onClick={() => {
                                 setIsOpen(false);
+                                navigate("/changepass");
+                            }}
+                        >
+                            <User className="w-4 h-4" />
+                            Thay đổi mật khẩu
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="justify-start w-full text-left gap-2"
+                            onClick={() => {
+                                setIsOpen(false);
                                 navigate("/settings");
                             }}
                         >

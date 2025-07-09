@@ -30,7 +30,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<RegisterError | null>(null)
   const { API } = useAPI();
-  const navigate= useNavigate();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -61,37 +61,34 @@ export function RegisterForm() {
     }
     return true
   }
-
-
-   const registerWithEmail = async (): Promise<void> => {
+  const registerWithEmail = async (): Promise<void> => {
     const payload = {
       email: formData.email,
       password: formData.password,
-    }
-
-    const response = await API.post(URLMapping.REGISTER,payload);
-    if(response.success){
-      const email= response.data;
-      localStorage.setItem("email", email);
-      navigate(`/verify`);
-    }
-  }
-
-  const handleGoogleRegister = async () => {
-    setIsLoading(true)
-    setError(null)
+    };
 
     try {
-      await loginWithGoogle()
-    } catch (err) {
+      setIsLoading(true);
+      const response = await API.post(URLMapping.REGISTER, payload);
+
+      if (response.success) {
+        localStorage.setItem("email", formData.email); // <-- bạn nên set từ formData
+        navigate(`/verify`);
+      } else {
+        setError({
+          field: "general",
+          message: response.message || "Registration failed",
+        });
+      }
+    } catch (err: any) {
       setError({
         field: "general",
-        message: err instanceof Error ? err.message : "Google registration failed. Please try again.",
-      })
+        message: err?.message || "Registration failed",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md shadow-2xl border-0">
@@ -111,7 +108,6 @@ export function RegisterForm() {
         <Button
           variant="outline"
           className="w-full h-12 text-gray-700 border-gray-300 hover:bg-gray-50"
-          onClick={handleGoogleRegister}
           disabled={isLoading}
         >
           <GoogleIcon className="mr-3 h-5 w-5" />
@@ -134,7 +130,15 @@ export function RegisterForm() {
           </Alert>
         )}
 
-        <form onSubmit={() => registerWithEmail} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (validateForm()) {
+              registerWithEmail();
+            }
+          }}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
               Email Address
@@ -285,3 +289,11 @@ export function RegisterForm() {
     </Card>
   )
 }
+function setIsLoading(arg0: boolean) {
+  throw new Error("Function not implemented.")
+}
+
+function setError(arg0: null) {
+  throw new Error("Function not implemented.")
+}
+
