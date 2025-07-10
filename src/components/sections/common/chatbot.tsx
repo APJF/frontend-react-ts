@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import {
   Send,
@@ -16,78 +15,75 @@ import {
   Settings,
   Menu,
   X,
+  Edit3,
+  Check,
+  XCircle,
+  Wrench,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import URLMapping, { API_URL_AI } from "@/utils/URLMapping"
+import { useAPI } from "@/hooks"
 
 interface Message {
-  id: string
+  id: number
   content: string
-  role: "user" | "assistant"
+  type: "human" | "ai"
   timestamp: Date
   isTyping?: boolean
+  isEditing?: boolean
 }
 
 interface ChatSession {
-  id: string
-  title: string
-  lastMessage: string
-  timestamp: Date
+  id: number
+  session_name: string
+  updated_at: string
   messages: Message[]
 }
 
-const initialMessage: Message = {
-  id: "1",
-  content:
-    "Xin chào! Tôi là AI Assistant của trung tâm tiếng Nhật. Tôi có thể giúp bạn tìm hiểu về các khóa học, lịch học, và trả lời mọi câu hỏi về việc học tiếng Nhật. Bạn cần hỗ trợ gì hôm nay? 🇯🇵",
-  role: "assistant",
-  timestamp: new Date(),
+interface AITool {
+  id: string
+  name: string
+  description: string
 }
 
-const sampleChatSessions: ChatSession[] = [
-  {
-    id: "1",
-    title: "Tư vấn khóa học N5",
-    lastMessage: "Cảm ơn bạn đã tư vấn!",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    messages: [initialMessage],
-  },
-  {
-    id: "2",
-    title: "Lịch học và giá cả",
-    lastMessage: "Tôi sẽ cân nhắc và liên hệ lại",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    messages: [initialMessage],
-  },
-  {
-    id: "3",
-    title: "Phương pháp học hiệu quả",
-    lastMessage: "Có thể giải thích thêm về Kanji không?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    messages: [initialMessage],
-  },
+const availableTools: AITool[] = [
+  { id: "learning_path", name: "Tạo lộ trình học", description: "Tạo lộ trình học tiếng Nhật cá nhân hóa" },
+  { id: "grammar_check", name: "Kiểm tra ngữ pháp", description: "Kiểm tra và sửa lỗi ngữ pháp" },
+  { id: "vocabulary", name: "Từ vựng", description: "Tra cứu và học từ vựng tiếng Nhật" },
+  { id: "conversation", name: "Luyện hội thoại", description: "Luyện tập hội thoại tiếng Nhật" },
+  { id: "jlpt_prep", name: "Luyện thi JLPT", description: "Chuẩn bị cho kỳ thi JLPT" },
 ]
 
-export default function Chatbot() {
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(sampleChatSessions)
-  const [currentChatId, setCurrentChatId] = useState<string>("1")
+export default function ChatbotLocalhost() {
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
+  const [currentChatId, setCurrentChatId] = useState<number | null>(null)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedTool, setSelectedTool] = useState<string>("learning_path")
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState("")
+  const [userId] = useState("1") // Mock user ID
+  const [error, setError] = useState<string>("")
+  const { API } = useAPI();
+  const [currentMessages , setCurrentMessages]= useState<any[]>([])
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const currentChat = chatSessions.find((chat) => chat.id === currentChatId)
-  const currentMessages = currentChat?.messages || [initialMessage]
 
-  const filteredChatSessions = chatSessions.filter(
-    (chat) =>
-      chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredChatSessions = chatSessions.filter((chat) =>
+    chat.session_name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   const scrollToBottom = () => {
@@ -96,75 +92,131 @@ export default function Chatbot() {
 
   useEffect(() => {
     scrollToBottom()
+    console.log(currentMessages, chatSessions)
   }, [currentMessages])
 
-  const generateAIResponse = async (userMessage: string): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000))
+  useEffect(() => {
+    setCurrentMessages(currentChat?.messages || []);
+  }, [currentChat])
 
-    const responses = {
-      greeting: [
-        "Chào bạn! Tôi rất vui được hỗ trợ bạn về việc học tiếng Nhật. 🎌",
-        "Xin chào! Tôi có thể giúp bạn tìm hiểu về các khóa học tiếng Nhật của chúng tôi. ✨",
-      ],
-      course: [
-        "Chúng tôi có các khóa học từ N5 đến N1, phù hợp với mọi trình độ. Khóa N5 dành cho người mới bắt đầu với 800 từ vựng cơ bản và 45 ngữ pháp. Bạn muốn tìm hiểu khóa nào cụ thể? 📚",
-        "Các khóa học của chúng tôi được thiết kế theo chuẩn JLPT với giáo viên bản ngữ. Có khóa cơ bản (N5-N4), trung cấp (N3-N2) và nâng cao (N1). Bạn đang ở trình độ nào? 🎯",
-      ],
-      default: [
-        "Đó là một câu hỏi hay! Tôi sẽ cố gắng trả lời tốt nhất có thể. Bạn có thể cung cấp thêm chi tiết để tôi hỗ trợ chính xác hơn không? 🤔",
-        "Cảm ơn bạn đã hỏi. Tôi hiểu bạn muốn biết về điều này. Bạn có thể liên hệ với tư vấn viên để được hỗ trợ chi tiết hơn. 📞",
-      ],
+  // Load chat sessions on component mount
+  useEffect(() => {
+    loadChatSessions()
+  }, [])
+
+  const loadChatSessions = async () => {
+    setError("")
+    try {
+      const response = await API.get(`/sessions/user/1`, API_URL_AI);
+      if (response.success && response.sessions) {
+        const sessions = response.sessions.map((session: any) => ({
+          ...session,
+          messages: [],
+        }))
+        setChatSessions(sessions)
+        if (sessions.length > 0) {
+          setCurrentChatId(sessions[0].id)
+          loadChatMessages(sessions[0].id)
+        }
+      } else {
+        setError("Không thể tải danh sách chat")
+      }
+    } catch (error) {
+      setError("Lỗi kết nối đến server")
+      console.error("Error loading chat sessions:", error)
     }
+  }
 
-    const lowerMessage = userMessage.toLowerCase()
+  const loadChatMessages = async (sessionId: number) => {
+    try {
+      // Giả sử API trả về messages theo format như trong ví dụ
+      const response = await API.get(`/sessions/${sessionId}/history`, API_URL_AI)
+      if (response.success && response.messages) {
+        const messages = response.messages.map((msg: any, index: number) => ({
+          id: `${sessionId}-${index}`,
+          content: msg.content,
+          type: msg.type,
+          timestamp: new Date(),
+        }))
 
-    if (lowerMessage.includes("chào") || lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-      return responses.greeting[Math.floor(Math.random() * responses.greeting.length)]
-    } else if (
-      lowerMessage.includes("khóa học") ||
-      lowerMessage.includes("course") ||
-      lowerMessage.includes("n5") ||
-      lowerMessage.includes("n4") ||
-      lowerMessage.includes("jlpt")
-    ) {
-      return responses.course[Math.floor(Math.random() * responses.course.length)]
-    } else {
-      return responses.default[Math.floor(Math.random() * responses.default.length)]
+        setChatSessions((prev) => prev.map((chat) => (chat.id === sessionId ? { ...chat, messages } : chat)))
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error)
+    }
+    setCurrentChatId(sessionId)
+  }
+
+  const createNewChat = async () => {
+    setError("")
+    try {
+      const payload = {
+        user_id: "1",
+        session_name: "Cuộc trò chuyện mới",
+      }
+
+      const response = await API.post("sessions/", payload , API_URL_AI);
+ 
+      if (response.success) {
+        await loadChatSessions()
+      } else {
+        setError("Không thể tạo chat mới")
+      }
+    } catch (error) {
+      setError("Lỗi khi tạo chat mới")
+      console.error("Error creating new chat:", error)
+    }
+  }
+
+  const deleteChat = async (sessionId: number) => {
+    setError("")
+    try {
+      const response = await API.delete(`sessions/${sessionId}`, API_URL_AI);
+
+      if (response.success) {
+        setChatSessions((prev) => prev.filter((chat) => chat.id !== sessionId))
+        if (currentChatId === sessionId) {
+          const remainingChats = chatSessions.filter((chat) => chat.id !== sessionId)
+          if (remainingChats.length > 0) {
+            setCurrentChatId(remainingChats[0].id)
+            loadChatMessages(remainingChats[0].id)
+          } else {
+            setCurrentChatId(null)
+          }
+        }
+      } else {
+        setError("Không thể xóa chat")
+      }
+    } catch (error) {
+      setError("Lỗi khi xóa chat")
+      console.error("Error deleting chat:", error)
     }
   }
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || isLoading) return
+    if (!content.trim() || isLoading || !currentChatId) return
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: currentChatId,
       content: content.trim(),
-      role: "user",
+      type: "human",
       timestamp: new Date(),
     }
 
-    // Update current chat with new message
+    // Add user message to current chat
     setChatSessions((prev) =>
-      prev.map((chat) =>
-        chat.id === currentChatId
-          ? {
-              ...chat,
-              messages: [...chat.messages, userMessage],
-              lastMessage: content.trim(),
-              timestamp: new Date(),
-            }
-          : chat,
-      ),
+      prev.map((chat) => (chat.id === currentChatId ? { ...chat, messages: [...chat.messages, userMessage] } : chat)),
     )
 
     setInputValue("")
     setIsLoading(true)
+    setError("")
 
     // Add typing indicator
     const typingMessage: Message = {
-      id: "typing",
+      id: -1,
       content: "",
-      role: "assistant",
+      type: "ai",
       timestamp: new Date(),
       isTyping: true,
     }
@@ -174,43 +226,53 @@ export default function Chatbot() {
     )
 
     try {
-      const aiResponse = await generateAIResponse(content)
+      const payload = {
+        session_id: currentChatId+"",
+        user_input: content.trim(),
+      }
 
-      // Remove typing indicator and add real response
-      setChatSessions((prev) =>
-        prev.map((chat) =>
-          chat.id === currentChatId
-            ? {
+      const response = await API.post("/chat/invoke", payload, API_URL_AI)
+
+      if (response.success) {
+        const aiMessage: Message = {
+          id: response.session_id,
+          content:response.ai_response,
+          type: "ai",
+          timestamp: new Date(),
+        }
+
+        // Remove typing indicator and add AI response
+        setChatSessions((prev) =>
+          prev.map((chat) =>
+            chat.id === currentChatId
+              ? {
                 ...chat,
-                messages: chat.messages
-                  .filter((msg) => msg.id !== "typing")
-                  .concat({
-                    id: Date.now().toString(),
-                    content: aiResponse,
-                    role: "assistant",
-                    timestamp: new Date(),
-                  }),
-                lastMessage: aiResponse.slice(0, 50) + "...",
-                timestamp: new Date(),
+                messages: chat.messages.filter(message => message.id != -1).concat(aiMessage),
               }
-            : chat,
-        ),
-      )
+              : chat,
+          ),
+        )
+      } else {
+        throw new Error(response.error || "API call failed")
+      }
     } catch (error) {
+      setError("Lỗi khi gửi tin nhắn")
+      console.error("Error sending message:", error)
+
+      const errorMessage: Message = {
+        id: currentChatId,
+        content: "Xin lỗi, tôi gặp sự cố kỹ thuật. Vui lòng thử lại sau. 😅",
+        type: "ai",
+        timestamp: new Date(),
+      }
+
       setChatSessions((prev) =>
         prev.map((chat) =>
           chat.id === currentChatId
             ? {
-                ...chat,
-                messages: chat.messages
-                  .filter((msg) => msg.id !== "typing")
-                  .concat({
-                    id: Date.now().toString(),
-                    content: "Xin lỗi, tôi gặp sự cố kỹ thuật. Vui lòng thử lại sau. 😅",
-                    role: "assistant",
-                    timestamp: new Date(),
-                  }),
-              }
+              ...chat,
+              messages: chat.messages.filter(message => message.id != -1).concat(errorMessage),
+            }
             : chat,
         ),
       )
@@ -219,34 +281,80 @@ export default function Chatbot() {
     }
   }
 
+  const handleEditAndResubmit = async (newContent: string) => {
+    if (!currentChatId || !newContent.trim()) return
+
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const payload = {
+        session_id: currentChatId,
+        new_message: newContent.trim(),
+        tool: selectedTool,
+        user_id: userId,
+      }
+
+      const response = await API.post("/chat/edit_and_resubmit", API_URL_AI);
+
+      if (response.success) {
+        // Reload messages to get updated conversation
+        await loadChatMessages(currentChatId)
+      } else {
+        setError("Không thể chỉnh sửa và gửi lại tin nhắn")
+      }
+    } catch (error) {
+      setError("Lỗi khi chỉnh sửa tin nhắn")
+      console.error("Error editing and resubmitting:", error)
+    } finally {
+      setIsLoading(false)
+      setEditingContent("")
+    }
+  }
+
+  const handleEditMessage = (messageId: string, content: string) => {
+    setEditingMessageId(messageId)
+    setEditingContent(content)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingMessageId || !currentChatId) return
+
+    // Check if this is the last human message
+    const humanMessages = currentMessages.filter((msg) => msg.type === "human")
+    const lastHumanMessage = humanMessages[humanMessages.length - 1]
+
+    if (editingMessageId === lastHumanMessage?.id) {
+      // Use edit_and_resubmit API for the last message
+      await handleEditAndResubmit(editingContent)
+    } else {
+      // For other messages, just update locally
+      setChatSessions((prev) =>
+        prev.map((chat) =>
+          chat.id === currentChatId
+            ? {
+              ...chat,
+              messages: chat.messages.map((msg) =>
+                msg.id === editingMessageId ? { ...msg, content: editingContent } : msg,
+              ),
+            }
+            : chat,
+        ),
+      )
+      setEditingMessageId(null)
+      setEditingContent("")
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null)
+    setEditingContent("")
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage(inputValue)
-    }
-  }
-
-  const createNewChat = () => {
-    const newChat: ChatSession = {
-      id: Date.now().toString(),
-      title: "Cuộc trò chuyện mới",
-      lastMessage: "Bắt đầu cuộc trò chuyện...",
-      timestamp: new Date(),
-      messages: [initialMessage],
-    }
-    setChatSessions((prev) => [newChat, ...prev])
-    setCurrentChatId(newChat.id)
-  }
-
-  const deleteChat = (chatId: string) => {
-    setChatSessions((prev) => prev.filter((chat) => chat.id !== chatId))
-    if (currentChatId === chatId) {
-      const remainingChats = chatSessions.filter((chat) => chat.id !== chatId)
-      if (remainingChats.length > 0) {
-        setCurrentChatId(remainingChats[0].id)
-      } else {
-        createNewChat()
-      }
     }
   }
 
@@ -278,13 +386,11 @@ export default function Chatbot() {
               <X className="h-4 w-4" />
             </Button>
           </div>
-
           <Button onClick={createNewChat} className="w-full bg-red-600 hover:bg-red-700 text-white mb-3">
             <Plus className="h-4 w-4 mr-2" />
             Tạo đoạn chat mới
           </Button>
-
-          <div className="relative">
+          <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Tìm kiếm cuộc trò chuyện..."
@@ -293,6 +399,10 @@ export default function Chatbot() {
               className="pl-10 text-sm"
             />
           </div>
+          <Button onClick={loadChatSessions} variant="outline" size="sm" className="w-full bg-transparent">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Làm mới
+          </Button>
         </div>
 
         {/* Chat Sessions List */}
@@ -301,21 +411,21 @@ export default function Chatbot() {
             {filteredChatSessions.map((chat) => (
               <div
                 key={chat.id}
-                className={`p-3 rounded-lg cursor-pointer mb-2 group hover:bg-gray-50 transition-colors ${
-                  currentChatId === chat.id ? "bg-red-50 border border-red-200" : ""
-                }`}
-                onClick={() => setCurrentChatId(chat.id)}
+                className={`p-3 rounded-lg cursor-pointer mb-2 group hover:bg-gray-50 transition-colors ${currentChatId === chat.id ? "bg-red-50 border border-red-200" : ""
+                  }`}
+                onClick={() => {
+ 
+                  loadChatMessages(chat.id)
+                }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <h3 className="text-sm font-medium text-gray-900 truncate">{chat.title}</h3>
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{chat.session_name}</h3>
                     </div>
-                    <p className="text-xs text-gray-500 truncate mb-1">{chat.lastMessage}</p>
-                    <p className="text-xs text-gray-400">{formatTime(chat.timestamp)}</p>
+                    <p className="text-xs text-gray-400">{formatTime(new Date(chat.updated_at))}</p>
                   </div>
-
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -326,6 +436,12 @@ export default function Chatbot() {
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => deleteChat(chat.id)} className="text-red-600">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
@@ -353,12 +469,11 @@ export default function Chatbot() {
                   <h1 className="text-lg font-semibold text-gray-900">AI Assistant</h1>
                   <div className="flex items-center gap-1 text-sm text-gray-500">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>Đang hoạt động</span>
+                    <span>localhost:8090</span>
                   </div>
                 </div>
               </div>
             </div>
-
             <div className="flex items-center gap-2">
               <Badge className="bg-red-100 text-red-700 hover:bg-red-100">🇯🇵 Tiếng Nhật</Badge>
               <Button variant="ghost" size="sm">
@@ -368,51 +483,123 @@ export default function Chatbot() {
           </div>
         </div>
 
+        {/* Error Alert */}
+        {error && (
+          <div className="p-4">
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
+
+        {/* AI Tool Selection */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <Wrench className="h-4 w-4 text-gray-600" />
+            <span className="text-sm font-medium text-gray-700">Công cụ AI:</span>
+            <Select value={selectedTool} onValueChange={setSelectedTool}>
+              <SelectTrigger className="w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTools.map((tool) => (
+                  <SelectItem key={tool.id} value={tool.id}>
+                    <div>
+                      <div className="font-medium">{tool.name}</div>
+                      <div className="text-xs text-gray-500">{tool.description}</div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Messages */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4 max-w-4xl mx-auto">
-              {currentMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {message.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-4 w-4 text-white" />
-                    </div>
-                  )}
+              {currentMessages.map((message, index) => {
+                const lastHumanIndex = currentMessages.length - 1 - currentMessages.slice().reverse().findIndex(m => m.type === "human");
+                const isLastHumanMessage = message.type === "human" && index === lastHumanIndex;
+                  
 
+                return (
                   <div
-                    className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                      message.role === "user" ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
-                    }`}
+                    key={message.id}
+                    className={`flex gap-3 ${message.type === "human" ? "justify-end" : "justify-start"}`}
                   >
-                    {message.isTyping ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                        <span className="text-sm text-red-600">Đang trả lời...</span>
+                    {message.type === "ai" && (
+                      <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                        <Bot className="h-4 w-4 text-white" />
                       </div>
-                    ) : (
-                      <>
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-2">
-                          {message.timestamp.toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </>
+                    )}
+                    <div
+                      className={`max-w-[70%] rounded-2xl px-4 py-3 group relative ${message.type === "human" ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
+                        }`}
+                    >
+                      {message.isTyping ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                          <span className="text-sm text-red-600">Đang trả lời...</span>
+                        </div>
+                      ) : editingMessageId === message.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editingContent}
+                            onChange={(e) => setEditingContent(e.target.value)}
+                            className="min-h-[60px] text-sm"
+                            placeholder="Chỉnh sửa tin nhắn..."
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={handleSaveEdit} disabled={isLoading}>
+                              {isLoading ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <Check className="h-3 w-3 mr-1" />
+                              )}
+                              {isLastHumanMessage ? "Lưu & Gửi lại" : "Lưu"}
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Hủy
+                            </Button>
+                          </div>
+                          {isLastHumanMessage && (
+                            <p className="text-xs text-gray-500">Tin nhắn cuối sẽ được gửi lại và AI sẽ trả lời mới</p>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-xs opacity-70">
+                              {message.timestamp.toLocaleTimeString("vi-VN", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                            {isLastHumanMessage && (<Button
+                              size="sm"
+                              variant="ghost"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                              onClick={() => handleEditMessage(message.content)}
+                            >
+                              <Edit3 className="h-3 w-3" />
+                            </Button>)}
+
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    {message.type === "human" && (
+                      <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
                     )}
                   </div>
-
-                  {message.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                  )}
-                </div>
-              ))}
+                )
+              })}
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
@@ -429,12 +616,12 @@ export default function Chatbot() {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Nhập tin nhắn của bạn..."
-                  disabled={isLoading}
+                  disabled={isLoading || !currentChatId}
                   className="pr-12 py-3 rounded-2xl border-gray-300 focus:border-red-400 focus:ring-red-400"
                 />
                 <Button
                   onClick={() => handleSendMessage(inputValue)}
-                  disabled={!inputValue.trim() || isLoading}
+                  disabled={!inputValue.trim() || isLoading || !currentChatId}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-red-600 hover:bg-red-700 rounded-full h-8 w-8 p-0"
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -442,7 +629,7 @@ export default function Chatbot() {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng.
+              AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng. • Server: localhost:8090
             </p>
           </div>
         </div>

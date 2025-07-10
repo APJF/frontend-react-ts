@@ -1,5 +1,7 @@
 const API_URL =
- (import.meta.env.VITE_API_URL as string) || "http://localhost:8080";
+ (import.meta.env.VITE_API_URL as string) || "http://localhost:8080/api";
+
+ const API_URL_AI= "http://localhost:8090";
 
 const URLMapping = {
   // User APIs
@@ -25,14 +27,9 @@ const URLMapping = {
 
   // Material APIs
   MATERIAL_CREATE:"/materials/create",
-
-  // 👉 AI APIs (cổng 8085)
-  AI_CHAT_INVOKE: `/chat/invoke`,
-  AI_SESSION_CREATE: `/sessions`,
-  AI_SESSION_BY_USER: (userId: string) => `/sessions/user/${userId}`,
-  AI_SESSION_DELETE: (sessionId: string) => `/sessions/${sessionId}`,
 };
 
 export default URLMapping;
 
 export { API_URL };
+export {API_URL_AI};
