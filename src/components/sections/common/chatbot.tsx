@@ -11,14 +11,12 @@ import {
   MessageSquare,
   Trash2,
   MoreHorizontal,
-  Search,
   Settings,
   Menu,
   X,
   Edit3,
   Check,
   XCircle,
-  Wrench,
   RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -26,10 +24,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import URLMapping, { API_URL_AI } from "@/utils/URLMapping"
+import { API_URL_AI } from "@/utils/URLMapping"
 import { useAPI } from "@/hooks"
 
 interface Message {
@@ -48,43 +45,25 @@ interface ChatSession {
   messages: Message[]
 }
 
-interface AITool {
-  id: string
-  name: string
-  description: string
-}
-
-const availableTools: AITool[] = [
-  { id: "learning_path", name: "Tạo lộ trình học", description: "Tạo lộ trình học tiếng Nhật cá nhân hóa" },
-  { id: "grammar_check", name: "Kiểm tra ngữ pháp", description: "Kiểm tra và sửa lỗi ngữ pháp" },
-  { id: "vocabulary", name: "Từ vựng", description: "Tra cứu và học từ vựng tiếng Nhật" },
-  { id: "conversation", name: "Luyện hội thoại", description: "Luyện tập hội thoại tiếng Nhật" },
-  { id: "jlpt_prep", name: "Luyện thi JLPT", description: "Chuẩn bị cho kỳ thi JLPT" },
-]
-
 export default function ChatbotLocalhost() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
   const [currentChatId, setCurrentChatId] = useState<number | null>(null)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTool, setSelectedTool] = useState<string>("learning_path")
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState("")
+  const [editingSessionId, setEditingSessionId] = useState<number | null>(null)
+  const [editingSessionName, setEditingSessionName] = useState("")
   const [userId] = useState("1") // Mock user ID
   const [error, setError] = useState<string>("")
-  const { API } = useAPI();
-  const [currentMessages , setCurrentMessages]= useState<any[]>([])
+  const { API } = useAPI()
+  const [currentMessages, setCurrentMessages] = useState<any[]>([])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const currentChat = chatSessions.find((chat) => chat.id === currentChatId)
-
-  const filteredChatSessions = chatSessions.filter((chat) =>
-    chat.session_name.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -96,7 +75,7 @@ export default function ChatbotLocalhost() {
   }, [currentMessages])
 
   useEffect(() => {
-    setCurrentMessages(currentChat?.messages || []);
+    setCurrentMessages(currentChat?.messages || [])
   }, [currentChat])
 
   // Load chat sessions on component mount
@@ -107,7 +86,7 @@ export default function ChatbotLocalhost() {
   const loadChatSessions = async () => {
     setError("")
     try {
-      const response = await API.get(`/sessions/user/1`, API_URL_AI);
+      const response = await API.get(`/sessions/user/1`, API_URL_AI)
       if (response.success && response.sessions) {
         const sessions = response.sessions.map((session: any) => ({
           ...session,
@@ -129,7 +108,6 @@ export default function ChatbotLocalhost() {
 
   const loadChatMessages = async (sessionId: number) => {
     try {
-      // Giả sử API trả về messages theo format như trong ví dụ
       const response = await API.get(`/sessions/${sessionId}/history`, API_URL_AI)
       if (response.success && response.messages) {
         const messages = response.messages.map((msg: any, index: number) => ({
@@ -138,7 +116,6 @@ export default function ChatbotLocalhost() {
           type: msg.type,
           timestamp: new Date(),
         }))
-
         setChatSessions((prev) => prev.map((chat) => (chat.id === sessionId ? { ...chat, messages } : chat)))
       }
     } catch (error) {
@@ -154,9 +131,8 @@ export default function ChatbotLocalhost() {
         user_id: "1",
         session_name: "Cuộc trò chuyện mới",
       }
+      const response = await API.post("sessions/", payload, API_URL_AI)
 
-      const response = await API.post("sessions/", payload , API_URL_AI);
- 
       if (response.success) {
         await loadChatSessions()
       } else {
@@ -169,27 +145,37 @@ export default function ChatbotLocalhost() {
   }
 
   const deleteChat = async (sessionId: number) => {
-    setError("")
-    try {
-      const response = await API.delete(`sessions/${sessionId}`, API_URL_AI);
+    const confirmDelete = window.confirm("Bạn có chắc muốn xóa cuộc trò chuyện này?");
+    if (!confirmDelete) return;
 
+    setError("");
+    try {
+      await API.delete(`sessions/${sessionId}`, sessionId, API_URL_AI); // không kiểm tra response.success
+      window.location.reload(); // ✅ đơn giản và hiệu quả
+    } catch (error) {
+      setError("Lỗi khi xóa chat");
+      console.error("Error deleting chat:", error);
+    }
+  };
+
+  const handleEditSessionName = async (sessionId: number, newName: string) => {
+    if (!newName.trim()) return
+
+    try {
+      const response = await API.put(`sessions/${sessionId}/rename`, { new_name: newName.trim() }, API_URL_AI)
       if (response.success) {
-        setChatSessions((prev) => prev.filter((chat) => chat.id !== sessionId))
-        if (currentChatId === sessionId) {
-          const remainingChats = chatSessions.filter((chat) => chat.id !== sessionId)
-          if (remainingChats.length > 0) {
-            setCurrentChatId(remainingChats[0].id)
-            loadChatMessages(remainingChats[0].id)
-          } else {
-            setCurrentChatId(null)
-          }
-        }
+        loadChatMessages(sessionId);
+        setChatSessions((prev) =>
+          prev.map((chat) => (chat.id === sessionId ? { ...chat, session_name: response.session_name } : chat)),
+        )
+        setEditingSessionId(null)
+        setEditingSessionName(response.session_name)
       } else {
-        setError("Không thể xóa chat")
+        setError("Không thể cập nhật tên session")
       }
     } catch (error) {
-      setError("Lỗi khi xóa chat")
-      console.error("Error deleting chat:", error)
+      setError("Lỗi khi cập nhật tên session")
+      console.error("Error updating session name:", error)
     }
   }
 
@@ -227,7 +213,7 @@ export default function ChatbotLocalhost() {
 
     try {
       const payload = {
-        session_id: currentChatId+"",
+        session_id: currentChatId + "",
         user_input: content.trim(),
       }
 
@@ -236,7 +222,7 @@ export default function ChatbotLocalhost() {
       if (response.success) {
         const aiMessage: Message = {
           id: response.session_id,
-          content:response.ai_response,
+          content: response.ai_response,
           type: "ai",
           timestamp: new Date(),
         }
@@ -247,7 +233,7 @@ export default function ChatbotLocalhost() {
             chat.id === currentChatId
               ? {
                 ...chat,
-                messages: chat.messages.filter(message => message.id != -1).concat(aiMessage),
+                messages: chat.messages.filter((message) => message.id != -1).concat(aiMessage),
               }
               : chat,
           ),
@@ -271,7 +257,7 @@ export default function ChatbotLocalhost() {
           chat.id === currentChatId
             ? {
               ...chat,
-              messages: chat.messages.filter(message => message.id != -1).concat(errorMessage),
+              messages: chat.messages.filter((message) => message.id != -1).concat(errorMessage),
             }
             : chat,
         ),
@@ -291,11 +277,10 @@ export default function ChatbotLocalhost() {
       const payload = {
         session_id: currentChatId,
         new_message: newContent.trim(),
-        tool: selectedTool,
         user_id: userId,
       }
 
-      const response = await API.post("/chat/edit_and_resubmit", API_URL_AI);
+      const response = await API.post("/chat/edit_and_resubmit", payload, API_URL_AI)
 
       if (response.success) {
         // Reload messages to get updated conversation
@@ -308,13 +293,20 @@ export default function ChatbotLocalhost() {
       console.error("Error editing and resubmitting:", error)
     } finally {
       setIsLoading(false)
+      setEditingMessageId(null)
       setEditingContent("")
     }
   }
 
-  const handleEditMessage = (messageId: string, content: string) => {
-    setEditingMessageId(messageId)
-    setEditingContent(content)
+  const handleEditMessage = (messageId: number, content: string) => {
+    // Chỉ cho phép edit tin nhắn cuối cùng của human
+    const humanMessages = currentMessages.filter((msg) => msg.type === "human")
+    const lastHumanMessage = humanMessages[humanMessages.length - 1]
+
+    if (messageId === lastHumanMessage?.id) {
+      setEditingMessageId(messageId)
+      setEditingContent(content)
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -373,7 +365,7 @@ export default function ChatbotLocalhost() {
   }
 
   return (
-    <div className="h-screen bg-white flex">
+    <div className="fixed top-16 left-0 right-0 bottom-0 bg-white flex overflow-hidden">
       {/* Sidebar */}
       <div
         className={`${sidebarOpen ? "w-80" : "w-0"} transition-all duration-300 border-r border-gray-200 flex flex-col overflow-hidden`}
@@ -390,15 +382,6 @@ export default function ChatbotLocalhost() {
             <Plus className="h-4 w-4 mr-2" />
             Tạo đoạn chat mới
           </Button>
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Tìm kiếm cuộc trò chuyện..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 text-sm"
-            />
-          </div>
           <Button onClick={loadChatSessions} variant="outline" size="sm" className="w-full bg-transparent">
             <RefreshCw className="h-4 w-4 mr-2" />
             Làm mới
@@ -408,21 +391,53 @@ export default function ChatbotLocalhost() {
         {/* Chat Sessions List */}
         <ScrollArea className="flex-1">
           <div className="p-2">
-            {filteredChatSessions.map((chat) => (
+            {chatSessions.map((chat) => (
               <div
                 key={chat.id}
                 className={`p-3 rounded-lg cursor-pointer mb-2 group hover:bg-gray-50 transition-colors ${currentChatId === chat.id ? "bg-red-50 border border-red-200" : ""
                   }`}
                 onClick={() => {
- 
-                  loadChatMessages(chat.id)
+                  if (editingSessionId !== chat.id) {
+                    loadChatMessages(chat.id)
+                  }
                 }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <h3 className="text-sm font-medium text-gray-900 truncate">{chat.session_name}</h3>
+                      {editingSessionId === chat.id ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Input
+                            value={editingSessionName}
+                            onChange={(e) => setEditingSessionName(e.target.value)}
+                            className="text-sm h-6 flex-1"
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                handleEditSessionName(chat.id, editingSessionName)
+                              }
+                              if (e.key === "Escape") {
+                                setEditingSessionId(null)
+                                setEditingSessionName("")
+                              }
+                            }}
+                            onBlur={() => setEditingSessionId(null)}
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditSessionName(chat.id, editingSessionName)
+                            }}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <h3 className="text-sm font-medium text-gray-900 truncate">{chat.session_name}</h3>
+                      )}
                     </div>
                     <p className="text-xs text-gray-400">{formatTime(new Date(chat.updated_at))}</p>
                   </div>
@@ -432,12 +447,29 @@ export default function ChatbotLocalhost() {
                         variant="ghost"
                         size="sm"
                         className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => deleteChat(chat.id)} className="text-red-600">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingSessionId(chat.id)
+                          setEditingSessionName(chat.session_name)
+                        }}
+                      >
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Sửa tên
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteChat(chat.id)
+                        }}
+                        className="text-red-600"
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Xóa
                       </DropdownMenuItem>
@@ -451,9 +483,9 @@ export default function ChatbotLocalhost() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Chat Header */}
-        <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {!sidebarOpen && (
@@ -485,44 +517,26 @@ export default function ChatbotLocalhost() {
 
         {/* Error Alert */}
         {error && (
-          <div className="p-4">
+          <div className="p-4 flex-shrink-0">
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           </div>
         )}
 
-        {/* AI Tool Selection */}
-        <div className="p-4 border-b border-gray-100 bg-gray-50">
-          <div className="flex items-center gap-3">
-            <Wrench className="h-4 w-4 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">Công cụ AI:</span>
-            <Select value={selectedTool} onValueChange={setSelectedTool}>
-              <SelectTrigger className="w-64">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTools.map((tool) => (
-                  <SelectItem key={tool.id} value={tool.id}>
-                    <div>
-                      <div className="font-medium">{tool.name}</div>
-                      <div className="text-xs text-gray-500">{tool.description}</div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
         {/* Messages */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4 max-w-4xl mx-auto">
               {currentMessages.map((message, index) => {
-                const lastHumanIndex = currentMessages.length - 1 - currentMessages.slice().reverse().findIndex(m => m.type === "human");
-                const isLastHumanMessage = message.type === "human" && index === lastHumanIndex;
-                  
+                const lastHumanIndex =
+                  currentMessages.length -
+                  1 -
+                  currentMessages
+                    .slice()
+                    .reverse()
+                    .findIndex((m) => m.type === "human")
+                const isLastHumanMessage = message.type === "human" && index === lastHumanIndex
 
                 return (
                   <div
@@ -558,16 +572,14 @@ export default function ChatbotLocalhost() {
                               ) : (
                                 <Check className="h-3 w-3 mr-1" />
                               )}
-                              {isLastHumanMessage ? "Lưu & Gửi lại" : "Lưu"}
+                              Lưu & Gửi lại
                             </Button>
                             <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
                               <XCircle className="h-3 w-3 mr-1" />
                               Hủy
                             </Button>
                           </div>
-                          {isLastHumanMessage && (
-                            <p className="text-xs text-gray-500">Tin nhắn cuối sẽ được gửi lại và AI sẽ trả lời mới</p>
-                          )}
+                          <p className="text-xs text-gray-500">Tin nhắn cuối sẽ được gửi lại và AI sẽ trả lời mới</p>
                         </div>
                       ) : (
                         <>
@@ -579,15 +591,16 @@ export default function ChatbotLocalhost() {
                                 minute: "2-digit",
                               })}
                             </p>
-                            {isLastHumanMessage && (<Button
-                              size="sm"
-                              variant="ghost"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                              onClick={() => handleEditMessage(message.content)}
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>)}
-
+                            {message.type === "human" && isLastHumanMessage && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                onClick={() => handleEditMessage(message.id, message.content)}
+                              >
+                                <Edit3 className="h-3 w-3" />
+                              </Button>
+                            )}
                           </div>
                         </>
                       )}
@@ -606,7 +619,7 @@ export default function ChatbotLocalhost() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
               <div className="flex-1 relative">
