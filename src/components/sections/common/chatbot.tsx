@@ -276,8 +276,7 @@ export default function ChatbotLocalhost() {
     try {
       const payload = {
         session_id: currentChatId,
-        new_message: newContent.trim(),
-        user_id: userId,
+        corrected_input: newContent.trim(),
       }
 
       const response = await API.post("/chat/edit_and_resubmit", payload, API_URL_AI)
@@ -373,7 +372,15 @@ export default function ChatbotLocalhost() {
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Lịch sử chat</h2>
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold text-gray-900">AI Assistant</h1>
+                  
+                </div>
+              </div>
             <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)} className="lg:hidden">
               <X className="h-4 w-4" />
             </Button>
@@ -493,18 +500,6 @@ export default function ChatbotLocalhost() {
                   <Menu className="h-4 w-4" />
                 </Button>
               )}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900">AI Assistant</h1>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>localhost:8090</span>
-                  </div>
-                </div>
-              </div>
             </div>
             <div className="flex items-center gap-2">
               <Badge className="bg-red-100 text-red-700 hover:bg-red-100">🇯🇵 Tiếng Nhật</Badge>
@@ -562,7 +557,7 @@ export default function ChatbotLocalhost() {
                           <Textarea
                             value={editingContent}
                             onChange={(e) => setEditingContent(e.target.value)}
-                            className="min-h-[60px] text-sm"
+                            className="min-h-[60px] max-h-[600px] text-sm text-black"
                             placeholder="Chỉnh sửa tin nhắn..."
                           />
                           <div className="flex gap-2">
@@ -579,7 +574,6 @@ export default function ChatbotLocalhost() {
                               Hủy
                             </Button>
                           </div>
-                          <p className="text-xs text-gray-500">Tin nhắn cuối sẽ được gửi lại và AI sẽ trả lời mới</p>
                         </div>
                       ) : (
                         <>
@@ -619,7 +613,7 @@ export default function ChatbotLocalhost() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+        <div className="p-4 bg-white flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
               <div className="flex-1 relative">
@@ -642,7 +636,7 @@ export default function ChatbotLocalhost() {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng. • Server: localhost:8090
+              AI có thể mắc lỗi. Vui lòng kiểm tra thông tin quan trọng.
             </p>
           </div>
         </div>
