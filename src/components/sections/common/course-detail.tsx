@@ -1,26 +1,21 @@
 
 
-import { useState, useEffect, useCallback, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
+import { useState, useEffect} from "react"
 import {
   ArrowLeft,
   Star,
   Clock,
   BookOpen,
   Target,
-  Play,
   Download,
   Share2,
-  Heart,
   Award,
-  CheckCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
 import { useAPI } from "@/hooks/useAPI"
-import URLMapping from "@/utils/URLMapping"
 import { useNavigate, useParams } from "react-router-dom"
 
 

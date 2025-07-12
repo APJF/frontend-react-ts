@@ -1,137 +1,91 @@
-import { API_URL } from "@/utils/URLMapping";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { API_URL,API_URL_AI } from "@/utils/URLMapping";
 
 export function useAPI() {
   const navigate = useNavigate();
 
-  const request = async (
-    method: string,
-    url: string,
-    data: any = {},
-    showToast: boolean = false,
-    showLoadingUI: boolean = true
-  ): Promise<any> => {
-    url = url.startsWith("/") ? url.slice(1) : url;
-    // const token = localStorage.get("token");
+  const API = useMemo(() => {
+    const request = async (
+      method: string,
+      url: string,
+      data: any = {},
+      port :string
+    ): Promise<any> => {
+      url = url.startsWith("/") ? url.slice(1) : url;
 
-    const headers: any = {
-      ...(!(data instanceof FormData) && { 'Content-Type': 'application/json' }),
-      // ...(token && { Authorization: `Bearer ${token}` }),
-    };
+      const token = localStorage.getItem("token");
 
-    try {
-      if (showLoadingUI) {
-      }
-
-      const options: RequestInit = {
-        method,
-        headers
+      const headers: Record<string, string> = {
+        ...(data instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
-      // Chỉ thêm body nếu không phải GET hoặc DELETE
-      if (method !== 'GET' && method !== 'DELETE') {
-        options.body = data instanceof FormData ? data : JSON.stringify(data);
+      try {
+        const options: RequestInit = {
+          method,
+          headers,
+        };
+
+        if (method !== "GET" && method !== "DELETE") {
+          options.body = data instanceof FormData ? data : JSON.stringify(data);
+        }
+
+        const response = await fetch(port + `/${url}`, options);
+
+        if (!response.ok) {
+          return handleErrorResponse(response);
+        }
+
+        const responseData = await response.json();
+        responseData.success = true;
+        return responseData;
+      } catch (error) {
+        return handleErrorResponse(error);
       }
+    };
 
-      const response = await fetch(`${API_URL}/api/${url}`, options);
+    const handleErrorResponse = async (response: any, showToast: boolean = true): Promise<any> => {
+      try {
+        let message = "Error";
+        let status = response?.status;
+        let responseData = await response.json();
 
-      if (!response.ok) {
-        return handleErrorResponse(response, showToast);
-      }
+        if (responseData?.message) {
+          message = responseData.message;
+        } else {
+          message = response?.statusText || "Error";
+        }
 
-      const responseData = await response.json();
-
-      if (showToast) {
-        // notification.success({
-        //   message: "Success",
-        //   description: responseData.message || "Success",
-        // });
-      }
-
-      responseData.success = true;
-      return responseData;
-    } catch (error) {
-      return handleErrorResponse(error, showToast);
-    } finally {
-      if (showLoadingUI) {
-      }
-    }
-  };
-
-  const handleErrorResponse = async (response: any, showToast: boolean = true): Promise<any> => {
-    try {
-      let message = "Error";
-      let status = response?.status;
-      let responseData = await response.json();
-
-      if (responseData?.message) {
-        message = responseData.message;
-      } else {
-        message = response?.statusText || "Error";
-      }
-
-      switch (status) {
-        case 401:
-          message = "";
+        if (status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           navigate("/login");
-          break;
-        case 403:
-          message = "";
-          // router.push("./dashboard");
-          break;
-        case 404:
-          message = "";
-          break;
-        case 500:
-          message = "";
-          break;
+        }
+
+        responseData.success = false;
+        responseData.message = message;
+        responseData.status = status;
+        return responseData;
+      } catch (err) {
+        return { success: false, message: "Disconnected" };
       }
+    };
 
-      if (showToast) {
-        // notification.error({
-        //   message: "Error",
-        //   description: message,
-        // });
-      }
+    return {
+      get: (url: string,port: string = API_URL) =>
+        request("GET", url, {}, port),
 
-      responseData.success = false;
-      responseData.message = message;
-      responseData.status = status;
-      return responseData;
-    } catch (err) {
-      // console.error("Error handling response:", err);
-      return { success: false, message: "Disconnected" };
-    }
-  };
+      post: (url: string, data: any = {},port: string = API_URL) =>
+        request("POST", url, data, port),
 
-  const API = {
-    get: (
-      url: string,
-      showToast: boolean = true,
-      showLoading: boolean = true
-    ): Promise<any> => request('GET', url, {}, showToast, showLoading),
+      put: (url: string, data: any = {},port: string = API_URL) =>
+        request("PUT", url, data,port),
 
-    post: (
-      url: string,
-      data: any = {},
-      showToast: boolean = true,
-      showLoading: boolean = true
-    ): Promise<any> => request('POST', url, data, showToast, showLoading),
-
-    put: (
-      url: string,
-      data: any = {},
-      showToast: boolean = true,
-      showLoading: boolean = true
-    ): Promise<any> => request('PUT', url, data, showToast, showLoading),
-
-    delete: (
-      url: string,
-      data: any = {},
-      showToast: boolean = true,
-      showLoading: boolean = true
-    ): Promise<any> => request('DELETE', url, data, showToast, showLoading),
-  };
+      delete: (url: string, data: any = {}, port: string = API_URL) =>
+        request("DELETE", url, data,port),
+    };
+  }, [navigate]);
 
   return { API };
 }

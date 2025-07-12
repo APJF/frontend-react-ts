@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Form, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button"
 import { Menu, X, BookOpen } from "lucide-react"
+import { AuthSection } from "./AuthSection";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -36,17 +37,8 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        
         <div className="hidden md:flex items-center space-x-4">
-          <a href="/login">
-            <Button  variant="ghost" size="sm">
-              Đăng Nhập
-            </Button>
-          </a>
-          <a href="/register"><Button size="sm" className="bg-red-600 hover:bg-red-700">
-            Đăng Ký
-          </Button></a>
-          
+          <AuthSection />
         </div>
 
         {/* Mobile Menu Button */}
@@ -69,16 +61,8 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-4 space-y-2">
-              <a href="/login">
-                <Button variant="ghost" size="sm" className="w-full">
-                  Đăng Nhập
-                </Button>
-              </a>
-              <a href="/register"><Button size="sm" className="w-full bg-red-600 hover:bg-red-700">
-                Đăng Ký
-              </Button></a>
-              
+            <div className="md:hidden px-4 pt-2">
+              <AuthSection />
             </div>
           </nav>
         </div>

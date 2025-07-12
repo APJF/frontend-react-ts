@@ -20,13 +20,12 @@ export function Hero() {
             <div className="space-y-4">
               <div className="inline-flex items-center space-x-2 bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
                 <Star className="h-4 w-4" />
-                <span>Trusted by 100,000+ learners</span>
               </div>
 
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                Master{" "}
+                Làm chủ{" "}
                 <span className="text-red-600 relative">
-                  Japanese
+                  Tiếng Nhật
                   <svg
                     className="absolute -bottom-2 left-0 w-full h-3 text-red-200"
                     viewBox="0 0 200 12"
@@ -35,23 +34,23 @@ export function Hero() {
                     <path d="M0,8 Q50,0 100,8 T200,8 L200,12 L0,12 Z" />
                   </svg>
                 </span>{" "}
-                with Confidence
+                với sự Tự Tin
               </h1>
 
               <p className="text-xl text-gray-600 leading-relaxed">
-                Learn Japanese through interactive lessons, practice with native speakers, and master Hiragana,
-                Katakana, and Kanji with our comprehensive platform.
+                Học tiếng Nhật thông qua các bài học tương tác, thực hành với người bản ngữ và thành thạo Hiragana,
+                Katakana và Kanji với nền tảng toàn diện của chúng tôi.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-red-600 hover:bg-red-700 text-lg px-8 py-3">
                 <BookOpen className="mr-2 h-5 w-5" />
-                Start Learning Free
+                Bắt đầu học miễn phí
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-3">
                 <Play className="mr-2 h-5 w-5" />
-                Watch Demo
+                Xem thử
               </Button>
             </div>
 
@@ -59,7 +58,7 @@ export function Hero() {
             <div className="flex items-center space-x-8 pt-4">
               <div className="flex items-center space-x-2">
                 <Users className="h-5 w-5 text-gray-400" />
-                <span className="text-sm text-gray-600">100,000+ Students</span>
+                <span className="text-sm text-gray-600">100+ Students</span>
               </div>
               <div className="flex items-center space-x-1">
                 {[...Array(5)].map((_, i) => (
@@ -74,12 +73,12 @@ export function Hero() {
           <div className="relative">
             <div className="relative z-10">
               <img
-                src="/placeholder.svg?height=600&width=500"
+                src="/src/img/hinhnennhatban.jpg"
                 alt="Japanese Learning Platform"
                 width={500}
                 height={600}
                 className="rounded-2xl shadow-2xl"
-                />
+              />
             </div>
 
             {/* Floating Cards */}
@@ -90,7 +89,7 @@ export function Hero() {
                 </div>
                 <div>
                   <div className="text-sm font-medium">Hiragana</div>
-                  <div className="text-xs text-gray-500">Basic Characters</div>
+                  <div className="text-xs text-gray-500">Chữ mềm</div>
                 </div>
               </div>
             </div>
@@ -102,7 +101,7 @@ export function Hero() {
                 </div>
                 <div>
                   <div className="text-sm font-medium">Kanji</div>
-                  <div className="text-xs text-gray-500">Advanced Writing</div>
+                  <div className="text-xs text-gray-500">Hán tự</div>
                 </div>
               </div>
             </div>
