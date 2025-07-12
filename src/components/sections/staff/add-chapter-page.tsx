@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
+import { useNavigate } from "react-router-dom"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,23 +32,82 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
     description: "",
     prerequisiteChapter: "",
   })
+  const [chapterCount, setChapterCount] = useState<number>(0)
+  const navigate = useNavigate()
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  // Hàm gọi API tạo chương
+  const createChapterApi = async (chapterData: any) => {
+    if (!course?.id) {
+      alert("Không tìm thấy Course ID. Vui lòng quay lại chọn khóa học.")
+      return
+    }
+    const payload: any = {
+      id: chapterData.chapterId,
+      title: chapterData.title,
+      description: chapterData.description,
+      status: "DRAFT",
+      courseId: course.id,
+      prerequisiteChapterId: chapterData.prerequisiteChapter || null,
+      units: [],
+    }
+    try {
+      const response = await fetch("http://localhost:8080/api/chapters", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01",
+        },
+        body: JSON.stringify(payload),
+      })
+      const data = await response.json()
+      if (response.ok && data.success) {
+        alert("Tạo chương thành công!")
+        navigate(-1) // Quay về trang trước (chi tiết khóa học)
+      } else {
+        alert(data.message || "Tạo chương thất bại!")
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!")
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onCreateChapter({
+    const chapterData = {
       chapterId: formData.chapterId,
       title: formData.title,
       description: formData.description,
       prerequisiteChapter: formData.prerequisiteChapter,
       subjectId: course.id,
-    })
+    }
+    createChapterApi(chapterData)
   }
 
   const isFormValid = formData.chapterId.trim() && formData.title.trim() && formData.description.trim()
+
+  useEffect(() => {
+    // Ưu tiên lấy số chương từ course.chapters nếu có, nếu không thì fetch lại từ backend
+    if (Array.isArray(course.chapters) && course.chapters.length > 0) {
+      setChapterCount(course.chapters.length)
+    } else if (course.id) {
+      fetch(`http://localhost:8080/api/courses/${course.id}/detail`)
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.success && res.data && Array.isArray(res.data.chapters)) {
+            setChapterCount(res.data.chapters.length)
+          } else {
+            setChapterCount(0)
+          }
+        })
+        .catch(() => setChapterCount(0))
+    } else {
+      setChapterCount(0)
+    }
+  }, [course])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -105,7 +165,7 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                   <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-blue-600 font-medium text-sm">ID Khóa học</span>
-                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.topic}</Badge>
+                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.id}</Badge>
                     </div>
                   </div>
 
@@ -119,7 +179,7 @@ export function AddChapterPage({ course, onBack, onCreateChapter }: AddChapterPa
                       <span className="text-green-700 font-medium text-sm">Số chương hiện tại</span>
                       <div className="flex items-center gap-2">
                         <Hash className="h-4 w-4 text-green-600" />
-                        <span className="text-2xl font-bold text-green-800">{course.chapters?.length || 0}</span>
+                        <span className="text-2xl font-bold text-green-800">{chapterCount}</span>
                         <span className="text-green-600 text-sm">chương</span>
                       </div>
                     </div>

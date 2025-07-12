@@ -22,20 +22,20 @@ export function UpdateUnitPage({ onBack, onUpdateUnit }: UpdateUnitPageProps) {
   const course = (location.state && location.state.course) as any;
 
   const [formData, setFormData] = useState({
-    unitId: unit?.unitId || "",
+    unitId: unit?.id || unit?.unitId || "",
     title: unit?.title || "",
     description: unit?.description || "",
-    prerequisiteUnit: unit?.prerequisiteUnit || "",
+    prerequisiteUnit: unit?.prerequisiteUnit || unit?.prerequisiteUnitId || "",
     materials: unit?.materials || [],
   });
 
   useEffect(() => {
     if (unit) {
       setFormData({
-        unitId: unit.unitId || "",
+        unitId: unit.id || unit.unitId || "",
         title: unit.title || "",
         description: unit.description || "",
-        prerequisiteUnit: unit.prerequisiteUnit || "",
+        prerequisiteUnit: unit.prerequisiteUnit || unit.prerequisiteUnitId || "",
         materials: unit.materials || [],
       });
     }
@@ -66,10 +66,35 @@ export function UpdateUnitPage({ onBack, onUpdateUnit }: UpdateUnitPageProps) {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onUpdateUnit) onUpdateUnit(formData);
-    navigate(-1);
+    const payload = {
+      id: formData.unitId,
+      title: formData.title,
+      description: formData.description,
+      status: "DRAFT",
+      chapterId: chapter?.id || unit?.chapterId || "",
+      prerequisiteUnitId: formData.prerequisiteUnit || null,
+    };
+    try {
+      const response = await fetch(`http://localhost:8080/api/units/${formData.unitId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert("Cập nhật bài học thành công!");
+        navigate(-1);
+      } else {
+        alert(data.message || "Cập nhật bài học thất bại!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!");
+    }
   };
   const isFormValid = formData.unitId && formData.title && formData.description;
 
@@ -100,9 +125,9 @@ export function UpdateUnitPage({ onBack, onUpdateUnit }: UpdateUnitPageProps) {
             <Input
               id="unitId"
               value={formData.unitId}
-              onChange={(e) => handleInputChange("unitId", e.target.value)}
-              placeholder="Ví dụ: U1"
-              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              readOnly
+              placeholder="Ví dụ: unit-04"
+              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 bg-gray-100 cursor-not-allowed"
               required
             />
           </div>

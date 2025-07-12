@@ -14,7 +14,6 @@ import AddNewCourse from './app/Staff/AddNewCourse';
 import ViewCourseDetail from './app/Staff/CourseDetail';
 import ManagerApprovalInterface from './app/Manager/ApproveStaffRequest';
 import ViewRequestFeedback from './app/Staff/ViewRequestFeedback'
-import Test from './app/Common/TestPage'
 import TestHistory from "./app/Common/TestHistory"
 import AddNewChapter from './app/Staff/AddNewChapter';
 import AddNewUnit from './app/Staff/AddNewUnit';
@@ -23,6 +22,10 @@ import UnitDetailPage from './app/Staff/UnitDetail';
 import { UpdateCoursePage } from "@/components/sections/staff/update-course-page";
 import { UpdateChapterPage } from "@/components/sections/staff/update-chapter-page";
 import { UpdateUnitPage } from "@/components/sections/staff/update-unit-page";
+import TestPreparationPage from './app/Common/TestPreparationPage';
+import TestDoPage from './app/Common/TestDoPage';
+import TestResultPage from './app/Common/TestResultPage';
+import TestReviewPage from './app/Common/TestReviewPage';
 
 function App() {
   const isAuthenticated = false;
@@ -53,9 +56,11 @@ function App() {
       <Route path="*" element={<HomePage />} />
       <Route path="/manager/request" element={<Dashboard />} />
       <Route path="/staff/viewrequestfeedback" element={<ViewRequestFeedback />} />
-      <Route path="/test" element={<Test />} />
-      <Route path="/test/history" element={<TestHistory />} />
-
+      <Route path="/test" element={<Navigate to="/test/preparation/1" />} />
+      <Route path="/test/preparation/:quizId" element={<TestPreparationPage />} />
+      <Route path="/test/do/:quizId" element={<TestDoPage />} />
+      <Route path="/test/result/:attemptId" element={<TestResultPage />} />
+      <Route path="/test/review/:attemptId" element={<TestReviewPage />} />
     </Routes>
   )
 }

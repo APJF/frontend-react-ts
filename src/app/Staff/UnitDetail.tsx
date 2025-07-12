@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookOpen, Info, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 interface MaterialDemo {
   type: string;
@@ -17,17 +18,48 @@ const UnitDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Nhận dữ liệu unit, chapter, course từ location.state
-  const unit = location.state?.unit;
+  const unitState = location.state?.unit;
   const chapter = location.state?.chapter;
   const course = location.state?.course;
+  const unitId = unitState?.id || unitState?.unitId || location.state?.unitId;
 
-  if (!unit || !chapter || !course) {
+  const [unit, setUnit] = useState<any>(unitState || null);
+  const [loading, setLoading] = useState<boolean>(!unitState);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (!unitId) return;
+    if (unitState) return; // đã có dữ liệu từ state
+    setLoading(true);
+    setError("");
+    fetch(`http://localhost:8080/api/units/${unitId}`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          setUnit(res.data);
+        } else {
+          setError("Không tìm thấy bài học.");
+        }
+      })
+      .catch(() => setError("Không thể tải dữ liệu bài học."))
+      .finally(() => setLoading(false));
+  }, [unitId, unitState]);
+
+  if (!unitId || (!unit && !loading) || !chapter || !course) {
     return (
       <AutoLayout>
         <div className="p-6 text-red-600 font-semibold">
           Không tìm thấy dữ liệu bài học, chương hoặc khóa học.
           <button onClick={() => navigate(-1)} className="text-blue-600 underline ml-2">Quay lại</button>
         </div>
+      </AutoLayout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <AutoLayout>
+        <div className="p-6 text-blue-600 font-semibold">Đang tải dữ liệu bài học...</div>
       </AutoLayout>
     );
   }
@@ -107,7 +139,7 @@ const UnitDetailPage: React.FC = () => {
                   className={unit.status === 'active' ? 'text-green-600 border-green-300 hover:bg-green-50 bg-transparent' : 'text-gray-500 border-gray-300 hover:bg-gray-100 bg-transparent'}
                   onClick={() => {
                     // Toggle trạng thái (demo)
-                    unit.status = unit.status === 'active' ? 'deactive' : 'active';
+                    // unit.status = unit.status === 'active' ? 'deactive' : 'active';
                   }}
                 >
                   {unit.status === 'active' ? 'Đang hoạt động' : 'Đã khóa'}
@@ -116,7 +148,7 @@ const UnitDetailPage: React.FC = () => {
               <div className="space-y-6">
                 <div>
                   <span className="text-blue-600 font-medium text-sm">Mã bài học</span>
-                  <div className="text-lg font-mono font-bold text-blue-900 mt-1">{unit.unitId}</div>
+                  <div className="text-lg font-mono font-bold text-blue-900 mt-1">{unit.id || unit.unitId}</div>
                 </div>
                 <div>
                   <span className="text-blue-600 font-medium text-sm">Tiêu đề bài học</span>
@@ -128,7 +160,7 @@ const UnitDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-blue-600 font-medium text-sm">Bài học tiên quyết</span>
-                  <div className="text-base text-blue-800 mt-1">{unit.prerequisiteUnit || "Không có"}</div>
+                  <div className="text-base text-blue-800 mt-1">{unit.prerequisiteUnitId || unit.prerequisiteUnit || "Không có"}</div>
                 </div>
               </div>
               {/* Danh sách tài liệu/materials */}

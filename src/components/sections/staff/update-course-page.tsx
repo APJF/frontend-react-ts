@@ -37,12 +37,9 @@ export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePagePro
 
   const levels = [
     { value: "BEGINNER", label: "Beginner" },
-    { value: "N5", label: "N5" },
-    { value: "N4", label: "N4" },
-    { value: "N3", label: "N3" },
-    { value: "N2", label: "N2" },
-    { value: "N1", label: "N1" },
-  ]
+    { value: "INTERMEDIATE", label: "Intermediate" },
+    { value: "ADVANCED", label: "Advanced" },
+  ];
 
   useEffect(() => {
     if (course) {
@@ -96,22 +93,44 @@ export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePagePro
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const courseData = {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload: any = {
       id: formData.id,
       title: formData.title,
       description: formData.description,
-      estimatedDuration: formData.estimatedDuration,
+      duration: Number(formData.estimatedDuration),
       level: formData.level,
       image: formData.image || "",
       requirement: formData.requirement || "",
-      prerequisite: formData.prerequisite || ""
+      status: "DRAFT",
+    };
+    if (formData.prerequisite && formData.prerequisite.trim() !== "") {
+      payload.prerequisiteCourseId = formData.prerequisite;
+    } else {
+      payload.prerequisiteCourseId = null;
     }
-    if (onUpdateCourse) onUpdateCourse(courseData)
-    // Sau khi update xong có thể điều hướng về trang chi tiết
-    navigate(-1)
+    try {
+      const response = await fetch(`http://localhost:8080/api/courses/${formData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert("Cập nhật khóa học thành công!");
+        navigate(-1); // Điều hướng về trang chi tiết khóa học và truyền id qua URL
+      } else {
+        alert(data.message || "Cập nhật khóa học thất bại!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!");
+    }
   }
+
   const isFormValid = formData.id && formData.title && formData.description && formData.level && formData.estimatedDuration
 
   return (

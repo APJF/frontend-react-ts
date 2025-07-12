@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,8 +29,33 @@ interface CourseDetailLayoutPageProps {
 }
 
 export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPageProps) {
-  const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set([1]))
+  const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set())
+  const [chapters, setChapters] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string>("")
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchChapters() {
+      setLoading(true)
+      setError("")
+      try {
+        const res = await fetch(`http://localhost:8080/api/courses/${course.id}/detail`)
+        const data = await res.json()
+        if (data.success && data.data && data.data.chapters) {
+          setChapters(data.data.chapters)
+        } else {
+          setChapters([])
+        }
+      } catch (err) {
+        setError("Không thể tải danh sách chương.")
+        setChapters([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (course?.id) fetchChapters()
+  }, [course])
 
   const toggleChapter = (chapterId: number) => {
     const newExpanded = new Set(expandedChapters)
@@ -42,45 +67,6 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
     setExpandedChapters(newExpanded)
   }
 
-  // Sample chapter data based on the image
-  const sampleChapters = [
-    {
-      id: 1,
-      title: "Hiragana - Bảng chữ cái cơ bản",
-      lessonCount: 8,
-      duration: "15 giờ",
-      lessons: ["Slot 1: Từ vựng chữ cái chính", "Slot 2: Ngữ pháp nền tảng", "Slot 3: Bài đọc ngắn"],
-    },
-    {
-      id: 2,
-      title: "Katakana - Bảng chữ cái người lại",
-      lessonCount: 8,
-      duration: "15 giờ",
-      lessons: [],
-    },
-    {
-      id: 3,
-      title: "Kanji cơ bản N5",
-      lessonCount: 12,
-      duration: "25 giờ",
-      lessons: [],
-    },
-    {
-      id: 4,
-      title: "Ngữ pháp N5",
-      lessonCount: 15,
-      duration: "30 giờ",
-      lessons: [],
-    },
-    {
-      id: 5,
-      title: "Từ vựng và Giao tiếp N5",
-      lessonCount: 10,
-      duration: "20 giờ",
-      lessons: [],
-    },
-  ]
-
   // Bổ sung các trường cho course nếu thiếu
   const courseWithInfo: any = {
     ...course,
@@ -88,7 +74,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
     title: course.title || 'Tiếng Nhật sơ cấp N5',
     topic: course.topic || 'Giao tiếp cơ bản',
     description: course.description || 'Khóa học tiếng Nhật N5 dành cho người mới bắt đầu, giúp bạn nắm vững các kiến thức cơ bản nhất của tiếng Nhật như Hiragana, Katakana, 100 chữ Kanji cơ bản, và các cấu trúc ngữ pháp cơ bản.',
-    estimatedDuration: course.estimatedDuration || '60 giờ',
+    estimatedDuration: course.estimatedDuration || (course as any).duration || '',
     level: course.level || 'N5',
     prerequisiteCourse: (course as any).prerequisiteCourse || '',
     status: course.status || 'active',
@@ -114,7 +100,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={ ()=> navigate(`/addchapter`)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+              <Button onClick={ () => navigate(`/addchapter`, { state: { course: courseWithInfo } }) } className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm chương
               </Button>
@@ -126,18 +112,17 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
               </Button>
               <Button
                 style={{
-                  backgroundColor: status === 'active' ? '#22c55e' : '#ef4444',
+                  backgroundColor: courseWithInfo.status === 'PUBLISHED' ? '#22c55e' : '#f59e42',
                   color: 'white',
                   border: 'none',
-                  boxShadow: status === 'active' ? '0 2px 8px #bbf7d0' : '0 2px 8px #fecaca',
+                  boxShadow: courseWithInfo.status === 'PUBLISHED' ? '0 2px 8px #bbf7d0' : '0 2px 8px #fed7aa',
+                  cursor: 'default',
+                  pointerEvents: 'none',
+                  opacity: 1
                 }}
-                onClick={() => {
-                  const newStatus = status === 'active' ? 'deactive' : 'active';
-                  setStatus(newStatus);
-                  courseWithInfo.status = newStatus;
-                }}
+                disabled
               >
-                {status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                {courseWithInfo.status === 'PUBLISHED' ? 'Đã xuất bản' : courseWithInfo.status === 'DRAFT' ? 'Bản nháp' : courseWithInfo.status}
               </Button>
             </div>
           </div>
@@ -166,7 +151,7 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                   <div><span className="font-semibold">Tiêu đề:</span> {courseWithInfo.title}</div>
                   <div><span className="font-semibold">Chủ đề:</span> {courseWithInfo.topic}</div>
                   <div><span className="font-semibold">Level:</span> {courseWithInfo.level}</div>
-                  <div><span className="font-semibold">Thời gian hoàn thành:</span> {courseWithInfo.estimatedDuration}</div>
+                  <div><span className="font-semibold">Thời gian hoàn thành:</span> {courseWithInfo.estimatedDuration || 'Chưa cập nhật'}</div>
                   <div><span className="font-semibold">Khóa học tiên quyết:</span> {courseWithInfo.prerequisiteCourse || 'Không có'}</div>
                 </div>
                 
@@ -254,122 +239,128 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-blue-600 font-medium">
-                        {sampleChapters.length} chương • {course.estimatedDuration}
+                        {loading ? 'Đang tải...' : `${chapters.length} chương • ${(courseWithInfo.estimatedDuration || 'Chưa cập nhật')}`}
                       </div>
                       <div className="text-xs text-blue-500">
-                        {sampleChapters.reduce((total, chapter) => total + chapter.lessonCount, 0)} bài học
+                        {loading ? '' : `${chapters.reduce((total, chapter) => total + (chapter.units?.length || 0), 0)} bài học`}
                       </div>
                     </div>
                   </div>
                 </div>
-
+                {error && <div className="text-red-500 mb-4">{error}</div>}
                 <div className="space-y-4">
-                  {sampleChapters.map((chapter, index) => (
-                    <div
-                      key={chapter.id}
-                      className="border border-blue-200 rounded-xl hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-blue-50/30"
-                    >
-                      <button
-                        onClick={() => toggleChapter(chapter.id)}
-                        className="w-full flex items-center justify-between p-6 text-left hover:bg-blue-50/50 transition-colors rounded-xl"
+                  {loading ? (
+                    <div className="text-blue-500">Đang tải nội dung...</div>
+                  ) : chapters.length === 0 ? (
+                    <div className="text-blue-500">Chưa có chương nào cho khóa học này.</div>
+                  ) : (
+                    chapters.map((chapter: any, index: number) => (
+                      <div
+                        key={chapter.id}
+                        className="border border-blue-200 rounded-xl hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-white to-blue-50/30"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-blue-900 text-lg mb-1">{chapter.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-blue-600">
-                              <div className="flex items-center gap-1">
-                                <Play className="h-4 w-4" />
-                                <span>{chapter.lessonCount} bài học</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>{chapter.duration}</span>
+                        <button
+                          onClick={() => toggleChapter(chapter.id)}
+                          className="w-full flex items-center justify-between p-6 text-left hover:bg-blue-50/50 transition-colors rounded-xl"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-blue-900 text-lg mb-1">{chapter.title}</h3>
+                              <div className="flex items-center gap-4 text-sm text-blue-600">
+                                <div className="flex items-center gap-1">
+                                  <Play className="h-4 w-4" />
+                                  <span>{chapter.units?.length || 0} bài học</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{chapter.estimatedDuration || chapter.duration || '--'}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/addunit`)
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Thêm bài học
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate('/chapterdetail', { state: { chapter, course } });
-                            }}
-                          >
-                            <BookOpen className="h-4 w-4 mr-1" />
-                            Xem chi tiết
-                          </Button>
-                          {expandedChapters.has(chapter.id) ? (
-                            <ChevronDown className="h-6 w-6 text-blue-400" />
-                          ) : (
-                            <ChevronRight className="h-6 w-6 text-blue-400" />
-                          )}
-                        </div>
-                      </button>
-
-                      {expandedChapters.has(chapter.id) && (
-                        <div className="border-t border-blue-200 bg-blue-50/30">
-                          <div className="p-6 space-y-3">
-                            {chapter.lessons.length > 0 ? (
-                              chapter.lessons.map((lesson, lessonIndex) => (
-                                <div
-                                  key={lessonIndex}
-                                  className="flex items-center gap-3 py-3 px-4 bg-white rounded-lg border border-blue-100 hover:shadow-md transition-all"
-                                >
-                                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                    <span className="text-xs text-white font-medium">{lessonIndex + 1}</span>
-                                  </div>
-                                  <span className="text-blue-700 font-medium">{lesson}</span>
-                                  <div className="ml-auto flex items-center gap-2">
-                                    <Badge variant="outline" className="text-xs border-blue-300 text-blue-600">
-                                      5 phút
-                                    </Badge>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:bg-blue-100">
-                                      <Play className="h-3 w-3 text-blue-600" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))
+                          <div className="flex items-center gap-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/addunit`, { state: { chapterId: chapter.id, courseId: course.id } })
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Thêm bài học
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate('/chapterdetail', { state: { chapter, course } });
+                              }}
+                            >
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              Xem chi tiết
+                            </Button>
+                            {expandedChapters.has(chapter.id) ? (
+                              <ChevronDown className="h-6 w-6 text-blue-400" />
                             ) : (
-                              <div className="text-center py-8">
-                                <div className="text-blue-400 mb-3">
-                                  <BookOpen className="h-12 w-12 mx-auto opacity-50" />
-                                </div>
-                                <p className="text-blue-600 font-medium mb-2">Chưa có bài học nào</p>
-                                <p className="text-sm text-blue-500 mb-4">Thêm bài học đầu tiên cho chương này</p>
-                                <Button  onClick={() => navigate(`/addunit`) } size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Thêm bài học
-                                </Button>
-                              </div>
+                              <ChevronRight className="h-6 w-6 text-blue-400" />
                             )}
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        </button>
+                        {expandedChapters.has(chapter.id) && (
+                          <div className="border-t border-blue-200 bg-blue-50/30">
+                            <div className="p-6 space-y-3">
+                              {chapter.units && chapter.units.length > 0 ? (
+                                chapter.units.map((unit: any, unitIndex: number) => (
+                                  <div
+                                    key={unit.id}
+                                    className="flex items-center gap-3 py-3 px-4 bg-white rounded-lg border border-blue-100 hover:shadow-md transition-all"
+                                  >
+                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                      <span className="text-xs text-white font-medium">{unitIndex + 1}</span>
+                                    </div>
+                                    <span className="text-blue-700 font-medium">{unit.title}</span>
+                                    <div className="ml-auto flex items-center gap-2">
+                                      <Badge variant="outline" className="text-xs border-blue-300 text-blue-600">
+                                        {unit.estimatedDuration || unit.duration || '5 phút'}
+                                      </Badge>
+                                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:bg-blue-100">
+                                        <Play className="h-3 w-3 text-blue-600" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-center py-8">
+                                  <div className="text-blue-400 mb-3">
+                                    <BookOpen className="h-12 w-12 mx-auto opacity-50" />
+                                  </div>
+                                  <p className="text-blue-600 font-medium mb-2">Chưa có bài học nào</p>
+                                  <p className="text-sm text-blue-500 mb-4">Thêm bài học đầu tiên cho chương này</p>
+                                  <Button onClick={() => navigate(`/addunit`, { state: { chapterId: chapter.id, courseId: course.id } })} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Thêm bài học
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
-
                 {/* Add New Chapter Button */}
                 <div className="mt-8 pt-6 border-t border-blue-200">
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 text-lg font-medium shadow-lg">
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 text-lg font-medium shadow-lg"
+                    onClick={() => navigate('/addchapter', { state: { course: courseWithInfo } })}
+                  >
                     <Plus className="h-5 w-5 mr-2" />
                     Thêm chương mới
                   </Button>

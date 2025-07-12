@@ -25,9 +25,6 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
     id: chapter?.id || "",
     title: chapter?.title || "",
     description: chapter?.description || "",
-    estimatedDuration: (chapter as any)?.estimatedDuration || "",
-    level: (chapter as any)?.level || "",
-    topic: (chapter as any)?.topic || "",
     prerequisiteChapter: (chapter as any)?.prerequisiteChapter || "",
     courseId: (chapter as any)?.courseId || course?.id || "",
   });
@@ -38,9 +35,6 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
         id: chapter.id || "",
         title: chapter.title || "",
         description: chapter.description || "",
-        estimatedDuration: (chapter as any)?.estimatedDuration || "",
-        level: (chapter as any)?.level || "",
-        topic: (chapter as any)?.topic || "",
         prerequisiteChapter: (chapter as any)?.prerequisiteChapter || "",
         courseId: (chapter as any)?.courseId || course?.id || "",
       });
@@ -51,13 +45,38 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const chapterData = { ...formData };
-    if (onUpdateChapter) onUpdateChapter(chapterData);
-    navigate(-1);
+    const payload = {
+      id: formData.id,
+      title: formData.title,
+      description: formData.description,
+      status: "DRAFT",
+      courseId: formData.courseId,
+      prerequisiteChapterId: formData.prerequisiteChapter || null,
+      units: [],
+    };
+    try {
+      const response = await fetch(`http://localhost:8080/api/chapters/${formData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert("Cập nhật chương thành công!");
+        navigate(-1); // hoặc điều hướng về trang chi tiết chương
+      } else {
+        alert(data.message || "Cập nhật chương thất bại!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!");
+    }
   };
-  const isFormValid = formData.id && formData.title && formData.description && formData.level && formData.estimatedDuration;
+  const isFormValid = formData.id && formData.title && formData.description;
 
   return (
     <div className="min-h-screen bg-blue-50">
@@ -124,52 +143,6 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
             />
           </div>
 
-          {/* Estimated Duration */}
-          <div>
-            <Label htmlFor="estimatedDuration" className="text-sm font-medium text-blue-800 mb-2 block">
-              Thời lượng (giờ) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="estimatedDuration"
-              type="number"
-              min="1"
-              value={formData.estimatedDuration}
-              onChange={(e) => handleInputChange("estimatedDuration", e.target.value)}
-              placeholder="Ví dụ: 10"
-              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          {/* Level */}
-          <div>
-            <Label htmlFor="level" className="text-sm font-medium text-blue-800 mb-2 block">
-              Mức độ <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="level"
-              value={formData.level}
-              onChange={(e) => handleInputChange("level", e.target.value)}
-              placeholder="Ví dụ: N5"
-              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          {/* Topic */}
-          <div>
-            <Label htmlFor="topic" className="text-sm font-medium text-blue-800 mb-2 block">
-              Chủ đề
-            </Label>
-            <Input
-              id="topic"
-              value={formData.topic}
-              onChange={(e) => handleInputChange("topic", e.target.value)}
-              placeholder="Ví dụ: Bảng chữ cái"
-              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
           {/* Prerequisite Chapter */}
           <div>
             <Label htmlFor="prerequisiteChapter" className="text-sm font-medium text-blue-800 mb-2 block">
@@ -184,7 +157,7 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
             />
           </div>
 
-          {/* Course ID */}
+          {/* Course ID (readonly) */}
           <div>
             <Label htmlFor="courseId" className="text-sm font-medium text-blue-800 mb-2 block">
               Mã khóa học
@@ -192,9 +165,8 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
             <Input
               id="courseId"
               value={formData.courseId}
-              onChange={(e) => handleInputChange("courseId", e.target.value)}
-              placeholder="Ví dụ: JPD111"
-              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              readOnly
+              className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 bg-gray-100 cursor-not-allowed"
             />
           </div>
 

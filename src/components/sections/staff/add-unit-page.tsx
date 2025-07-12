@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,7 @@ import {
   Award,
 } from "lucide-react"
 import type { Subject, Chapter } from "../entity"
+import { useNavigate, useLocation } from "react-router-dom"
 
 interface AddLessonPageProps {
   course: Subject
@@ -50,7 +51,14 @@ interface AddLessonPageProps {
   }) => void
 }
 
-export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLessonPageProps) {
+export function AddLessonPage(props: AddLessonPageProps) {
+  // Lấy object chapter và course từ location.state nếu có (ưu tiên object từ backend)
+  const location = useLocation();
+  const chapterFromState = location.state?.chapter;
+  const courseFromState = location.state?.course;
+  const chapter = chapterFromState || props.chapter;
+  const course = courseFromState || props.course;
+
   const [formData, setFormData] = useState({
     unitId: "",
     title: "",
@@ -69,6 +77,8 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
     },
   ])
 
+  const [chapterData, setChapterData] = useState<Chapter>(chapter);
+
   const skillTypes = [
     { value: "vocabulary", label: "Từ vựng" },
     { value: "kanji", label: "Kanji" },
@@ -76,6 +86,8 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
     { value: "reading", label: "Đọc hiểu" },
     { value: "listening", label: "Nghe hiểu" },
   ]
+
+  const navigate = useNavigate()
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -117,6 +129,60 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
     formData.title.trim() &&
     formData.unitDescription.trim() &&
     materials.every((m) => m.skill && m.name.trim() && m.url.trim())
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // Chuẩn bị payload gửi backend
+    const payload = {
+      id: formData.unitId,
+      title: formData.title,
+      description: formData.unitDescription,
+      status: "DRAFT",
+      chapterId: chapterData.id, // dùng id đã được cập nhật đúng dạng string
+      prerequisiteUnitId: formData.prerequisiteUnit || null,
+    };
+    try {
+      const response = await fetch("http://localhost:8080/api/units", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert("Tạo bài học thành công!")
+        navigate(-1) // Quay lại trang chi tiết chương
+      } else {
+        alert(data.message || "Tạo bài học thất bại!")
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!")
+    }
+  }
+
+  useEffect(() => {
+    // Nếu chapter.id là số, fetch lại thông tin chapter từ backend để lấy id dạng string
+    if (chapter && typeof chapter.id === 'number' && course?.id) {
+      fetch(`http://localhost:8080/api/chapters/${chapter.id}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success && res.data) {
+            setChapterData(res.data);
+          } else {
+            alert('Không tìm thấy chương học. Vui lòng quay lại.');
+            navigate(-1);
+          }
+        })
+        .catch(() => {
+          alert('Không thể tải dữ liệu chương học.');
+          navigate(-1);
+        });
+    } else if (chapter && typeof chapter.id === 'string') {
+      setChapterData(chapter);
+    }
+  }, [chapter, course, navigate])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -198,17 +264,17 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                       <Hash className="h-4 w-4 text-purple-600" />
                       <span className="text-purple-600 font-medium text-xs">CHƯƠNG</span>
                     </div>
-                    <Badge className="bg-purple-600 text-white text-xs mb-2">Chapter - {chapter.orderNumber}</Badge>
+                    <Badge className="bg-purple-600 text-white text-xs mb-2">Chapter - {chapterData.orderNumber}</Badge>
                   </div>
 
                   <div className="mb-4">
                     <div className="text-purple-600 font-medium text-xs mb-1">TÊN CHƯƠNG</div>
-                    <h4 className="text-purple-900 font-bold text-sm leading-tight">{chapter.title}</h4>
+                    <h4 className="text-purple-900 font-bold text-sm leading-tight">{chapterData.title}</h4>
                   </div>
 
                   <div className="mb-4">
                     <div className="text-purple-600 font-medium text-xs mb-1">THỨ TỰ CHƯƠNG</div>
-                    <div className="text-purple-900 font-semibold">Chương {chapter.orderNumber}</div>
+                    <div className="text-purple-900 font-semibold">Chương {chapterData.orderNumber}</div>
                   </div>
 
                   <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
@@ -246,16 +312,7 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
           <div className="lg:col-span-2">
             <form
               className="space-y-8"
-              onSubmit={(e) => {
-                e.preventDefault()
-                onCreateLesson({
-                  unitId: formData.unitId,
-                  unitDescription: formData.unitDescription,
-                  prerequisiteUnit: formData.prerequisiteUnit,
-                  chapterId: chapter.id,
-                  materials: materials.map(({ id, expanded, ...material }) => material),
-                })
-              }}
+              onSubmit={handleSubmit}
             >
               {/* Lesson Information */}
               <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
@@ -484,7 +541,7 @@ export function AddLessonPage({ course, chapter, onBack, onCreateLesson }: AddLe
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onBack}
+                  onClick={props.onBack}
                   className="px-8 py-3 border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent font-medium"
                 >
                   Hủy

@@ -42,13 +42,12 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
   const [dragActive, setDragActive] = useState(false)
 
   const levels = [
-    { value: "BEGINNER", label: "Beginner" },
     { value: "N5", label: "N5" },
     { value: "N4", label: "N4" },
     { value: "N3", label: "N3" },
     { value: "N2", label: "N2" },
     { value: "N1", label: "N1" },
-  ]
+  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -89,19 +88,43 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const courseData = {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const courseData: any = {
       id: formData.id,
       title: formData.title,
       description: formData.description,
-      estimatedDuration: formData.estimatedDuration,
+      duration: Number(formData.estimatedDuration),
       level: formData.level,
       image: formData.image || "",
       requirement: formData.requirement || "",
-      prerequisite: formData.prerequisite || ""
+      status: "DRAFT",
+    };
+    if (formData.prerequisite && formData.prerequisite.trim() !== "") {
+      courseData.prerequisiteCourseId = formData.prerequisite;
+    } else {
+      courseData.prerequisiteCourseId = null;
     }
-    onCreateCourse(courseData)
+
+    try {
+      const response = await fetch("http://localhost:8080/api/courses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": "staff-01"
+        },
+        body: JSON.stringify(courseData)
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert("Tạo khóa học thành công!");
+        window.location.href = "http://localhost:5173/viewlistcourse";
+      } else {
+        alert(data.message || "Tạo khóa học thất bại!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối server!");
+    }
   }
   const isFormValid = formData.id && formData.title && formData.description && formData.level && formData.estimatedDuration
 
@@ -196,7 +219,7 @@ export function CreateCoursePage({ onBack, onCreateCourse }: CreateCoursePagePro
               <SelectTrigger className="border-blue-300 focus:border-blue-500 focus:ring-blue-500">
                 <SelectValue placeholder="Chọn mức độ" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {levels.map((level) => (
                   <SelectItem key={level.value} value={level.value}>
                     {level.label}

@@ -51,140 +51,48 @@ interface PaginationData {
 }
 
 export default function ManagerApprovalInterface() {
-  // Sample data với nhiều records hơn để test pagination
-  const [allRequests] = useState<Request[]>([
-    // Subject 1: Hôm nay (27/06/2025)
-    {
-      id: 1,
-      type: "Subject",
-      title: "Tiếng Nhật cơ bản - Khóa học nhập môn",
-      creator: "Nguyễn Văn A",
-      status: "Pending",
-      createdAt: new Date("2025-06-27T19:47:00+07:00").toISOString(), // Hôm nay 07:47 PM
-      updatedAt: new Date("2025-06-27T19:47:00+07:00").toISOString(),
-      level: "N5",
-      topic: "Giao tiếp hàng ngày",
-      description: "Khóa học tiếng Nhật cơ bản dành cho người mới bắt đầu",
-      estimatedDuration: 120,
-      image: "/placeholder.svg?height=200&width=300",
-      orderNumber: 1,
-    },
-    // Subject 2: 1 tuần trước
-    {
-      id: 2,
-      type: "Subject",
-      title: "Tiếng Nhật nâng cao - N3",
-      creator: "Trần Thị B",
-      status: "Approved",
-      createdAt: new Date("2025-06-20T14:00:00+07:00").toISOString(),
-      updatedAt: new Date("2025-06-25T09:00:00+07:00").toISOString(),
-      level: "N3",
-      topic: "Kỹ năng viết",
-      description: "Khóa học nâng cao cho người đã học N4",
-      estimatedDuration: 150,
-      image: "/placeholder.svg?height=200&width=300",
-      orderNumber: 2,
-    },
-    // Chapter 1: 2 ngày trước
-    {
-      id: 3,
-      type: "Chapter",
-      title: "Chào hỏi và giới thiệu",
-      creator: "Lê Văn C",
-      status: "Pending",
-      createdAt: new Date("2025-06-25T10:00:00+07:00").toISOString(),
-      updatedAt: new Date("2025-06-26T15:00:00+07:00").toISOString(),
-      subjectId: "SUB001",
-      subjectName: "Tiếng Nhật cơ bản",
-      description: "Học cách chào hỏi và giới thiệu bản thân bằng tiếng Nhật",
-      orderNumber: 1,
-    },
-    // Chapter 2: 1 tháng trước
-    {
-      id: 4,
-      type: "Chapter",
-      title: "Ngữ pháp cơ bản",
-      creator: "Phạm Thị D",
-      status: "Rejected",
-      createdAt: new Date("2025-05-27T09:00:00+07:00").toISOString(),
-      updatedAt: new Date("2025-06-01T12:00:00+07:00").toISOString(),
-      subjectId: "SUB002",
-      subjectName: "Tiếng Nhật nâng cao",
-      description: "Học các cấu trúc ngữ pháp cơ bản",
-      orderNumber: 2,
-    },
-    // Unit 1: 1 tuần trước
-    {
-    id: 5,
-    type: "Unit",
-    title: "Bài 1: Xin chào",
-    creator: "Hoàng Văn E",
-    status: "Approved",
-    createdAt: new Date("2025-06-20T11:00:00+07:00").toISOString(),
-    updatedAt: new Date("2025-06-21T14:00:00+07:00").toISOString(),
-    subjectId: "SUB001",
-    subjectName: "Tiếng Nhật cơ bản",
-    chapterId: "CHA001",
-    chapterName: "Chào hỏi và giới thiệu",
-    description: "Học các cách chào hỏi cơ bản trong tiếng Nhật",
-    orderNumber: 1,
-    contents: [
-      { skill: "Từ vựng", description: "Học từ vựng cơ bản", pdfUrl: "https://drive.google.com/uc?export=preview&id=1fAcdXluuWuJTTLbHPHIlKOj4NCgPCllx" },
-      { skill: "Kanji", description: "Học kanji cơ bản", pdfUrl: "https://drive.google.com/uc?export=preview&id=1fiT93VhAlHWyFKBvrNW5yj8hGy9BiN-3" },
-      { skill: "Ngữ pháp", description: "Cấu trúc câu cơ bản", pdfUrl: "https://drive.google.com/uc?export=preview&id=1GPtxroxbfwJhmiVpVI4nj6U6Rm9m97NE" },
-      { skill: "Đọc hiểu", description: "Đoạn văn ngắn", pdfUrl: "https://drive.google.com/uc?export=preview&id=1H2Y3Z4X5W6V7B8N9M0P1Q2R3S4T5U6V" },
-      { skill: "Nghe", description: "Luyện nghe chào hỏi", pdfUrl: "https://drive.google.com/uc?export=preview&id=1J4K5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y" },
-    ],
-  },
-  // Unit 2: Hôm nay
-  {
-    id: 6,
-    type: "Unit",
-    title: "Bài 2: Kanji cơ bản",
-    creator: "Nguyễn Thị F",
-    status: "Pending",
-    createdAt: new Date("2025-06-27T19:00:00+07:00").toISOString(),
-    updatedAt: new Date("2025-06-27T19:47:00+07:00").toISOString(),
-    subjectId: "SUB002",
-    subjectName: "Tiếng Nhật nâng cao",
-    chapterId: "CHA003",
-    chapterName: "Chữ viết nâng cao",
-    description: "Học các Kanji nâng cao",
-    orderNumber: 2,
-    contents: [
-      { skill: "Từ vựng", description: "Từ vựng nâng cao", pdfUrl: "https://drive.google.com/uc?export=preview&id=1K6L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0Z" },
-      { skill: "Kanji", description: "Kanji phức tạp", pdfUrl: "https://drive.google.com/uc?export=preview&id=1L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0ZA" },
-      { skill: "Ngữ pháp", description: "Ngữ pháp phức tạp", pdfUrl: "https://drive.google.com/uc?export=preview&id=1M8N9O0P1Q2R3S4T5U6V7W8X9Y0ZAB" },
-      { skill: "Đọc hiểu", description: "Đoạn văn dài", pdfUrl: "https://drive.google.com/uc?export=preview&id=1N9O0P1Q2R3S4T5U6V7W8X9Y0ZABC" },
-      { skill: "Nghe", description: "Luyện nghe nâng cao", pdfUrl: "https://drive.google.com/uc?export=preview&id=1O0P1Q2R3S4T5U6V7W8X9Y0ZABCD" },
-    ],
-  },
+  // Thay thế sample data bằng fetch API
+  const [allRequests, setAllRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // Thêm nhiều data để test pagination
-    ...Array.from({ length: 20 }, (_, i) => ({
-      id: i + 6,
-      type: ["Subject", "Chapter", "Unit"][i % 3] as "Subject" | "Chapter" | "Unit",
-      title: `Sample ${["Subject", "Chapter", "Unit"][i % 3]} ${i + 6}`,
-      creator: `User ${i + 6}`,
-      status: ["Pending", "Approved", "Rejected"][i % 3] as "Pending" | "Approved" | "Rejected",
-      createdAt: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30).toISOString(),
-      updatedAt: new Date().toISOString(),
-      level: ["N5", "N4", "N3", "N2", "N1"][i % 5] as "N5" | "N4" | "N3" | "N2" | "N1",
-      topic: `Topic ${i + 6}`,
-      description: `Description for item ${i + 6}`,
-      subjectId: `SUB${String(i + 1).padStart(3, "0")}`,
-      subjectName: `Subject ${i + 1}`,
-      chapterId: `CHA${String(i + 1).padStart(3, "0")}`,
-      chapterName: `Chapter ${i + 1}`,
-      skill: ["Kanji", "Từ vựng", "Ngữ pháp", "Đọc hiểu", "Nghe"][i % 5] as
-        | "Kanji"
-        | "Từ vựng"
-        | "Ngữ pháp"
-        | "Đọc hiểu"
-        | "Nghe",
-      fileUri: `/content/unit${i + 6}_content.pdf`,
-    })),
-  ])
+  // Map API data sang Request type của FE
+  const mapApiToRequest = (item: any): Request => {
+    let type: Request["type"] = "Subject";
+    if (item.targetType === "COURSE") type = "Subject";
+    else if (item.targetType === "CHAPTER") type = "Chapter";
+    else if (item.targetType === "UNIT") type = "Unit";
+    // Lấy thêm level, topic nếu có từ item.target (nếu backend trả về)
+    return {
+      id: item.id,
+      type,
+      title: item.targetTitle,
+      creator: item.createdBy,
+      status: item.decision === "PENDING" ? "Pending" : item.decision === "APPROVED" ? "Approved" : "Rejected",
+      createdAt: item.createdAt,
+      updatedAt: item.reviewedAt || item.createdAt,
+      level: item.target?.level || undefined,
+      topic: item.target?.topic || undefined,
+      // ... các trường khác nếu backend trả về
+    };
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetch("http://localhost:8080/api/approval-requests")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setAllRequests(data.data.map(mapApiToRequest));
+        } else {
+          setAllRequests([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setAllRequests([]);
+        setLoading(false);
+      });
+  }, []);
 
   // States
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
@@ -210,6 +118,9 @@ export default function ManagerApprovalInterface() {
     totalItems: 0,
     itemsPerPage: 10,
   })
+
+  // Thêm state lưu lý do từ chối trong dialog chi tiết
+  const [detailRejectFeedback, setDetailRejectFeedback] = useState("");
 
   // Filter and search logic
   const filteredRequests = useMemo(() => {
@@ -344,20 +255,87 @@ export default function ManagerApprovalInterface() {
     }))
   }
 
-  const approveRequest = (id: number) => {
-    // In real app, this would be an API call
-    toast.success("Yêu cầu đã được phê duyệt!")
+  const approveRequest = async (id: number) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/approval-requests/${id}/approve`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewedBy: "admin" }) // Nếu backend yêu cầu
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Yêu cầu đã được phê duyệt!");
+        setAllRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "Approved", updatedAt: new Date().toISOString() } : r));
+      } else {
+        toast.error(data.message || "Phê duyệt thất bại!");
+      }
+    } catch (err: any) {
+      if (err instanceof Response) {
+        err.json().then((data: any) => toast.error(data.message || "Lỗi kết nối server!"));
+      } else {
+        toast.error("Lỗi kết nối server!");
+      }
+    }
   }
 
-  const handleRejectClick = (request: Request) => {
-    setRejectingRequest(request)
-    setIsRejectDialogOpen(true)
+  const handleRejectClick = (request: Request, fromDetailDialog = false) => {
+    if (fromDetailDialog) {
+      // Không mở popup mini, chỉ xử lý trong dialog chi tiết
+      handleRejectSubmitFromDetail(request);
+    } else {
+      setRejectingRequest(request)
+      setIsRejectDialogOpen(true)
+    }
   }
 
-  const handleRejectSubmit = () => {
+  // Hàm xử lý từ chối từ dialog chi tiết
+  const handleRejectSubmitFromDetail = async (request: Request) => {
+    if (detailRejectFeedback.trim()) {
+      try {
+        const res = await fetch(`http://localhost:8080/api/approval-requests/${request.id}/reject`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ feedback: detailRejectFeedback, reviewedBy: "admin" })
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast.success("Yêu cầu đã bị từ chối!");
+          setAllRequests((prev) => prev.map((r) => r.id === request.id ? { ...r, status: "Rejected", updatedAt: new Date().toISOString() } : r));
+          setIsDialogOpen(false);
+          setDetailRejectFeedback("");
+        } else {
+          toast.error(data.message || "Từ chối thất bại!");
+        }
+      } catch (err: any) {
+        toast.error("Lỗi kết nối server!");
+      }
+    } else {
+      toast.error("Vui lòng nhập lý do từ chối!");
+    }
+  }
+
+  const handleRejectSubmit = async () => {
     if (rejectingRequest && rejectFeedback.trim()) {
-      // In real app, this would be an API call with feedback
-      toast.error(`Yêu cầu đã bị từ chối. Lý do: ${rejectFeedback}`)
+      try {
+        const res = await fetch(`http://localhost:8080/api/approval-requests/${rejectingRequest.id}/reject`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ feedback: rejectFeedback, reviewedBy: "admin" }) // Nếu backend yêu cầu
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast.success("Yêu cầu đã bị từ chối!");
+          setAllRequests((prev) => prev.map((r) => r.id === rejectingRequest.id ? { ...r, status: "Rejected", updatedAt: new Date().toISOString() } : r));
+        } else {
+          toast.error(data.message || "Từ chối thất bại!");
+        }
+      } catch (err: any) {
+        if (err instanceof Response) {
+          err.json().then((data: any) => toast.error(data.message || "Lỗi kết nối server!"));
+        } else {
+          toast.error("Lỗi kết nối server!");
+        }
+      }
       setIsRejectDialogOpen(false)
       setRejectingRequest(null)
       setRejectFeedback("")
@@ -668,7 +646,7 @@ export default function ManagerApprovalInterface() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 012 2z"
                         />
                       </svg>
                       {new Date(selectedRequest.createdAt).toLocaleDateString("vi-VN")}
@@ -748,6 +726,8 @@ export default function ManagerApprovalInterface() {
                     className="w-full p-3 border border-gray-300 rounded-lg resize-none"
                     rows={4}
                     placeholder="Nhập ghi chú về quyết định duyệt hoặc lý do từ chối..."
+                    value={detailRejectFeedback}
+                    onChange={e => setDetailRejectFeedback(e.target.value)}
                   />
                 </div>
               </div>
@@ -892,7 +872,7 @@ export default function ManagerApprovalInterface() {
                   Duyệt yêu cầu
                 </button>
                 <button
-                  onClick={() => handleRejectClick(selectedRequest)}
+                  onClick={() => handleRejectClick(selectedRequest, true)}
                   disabled={selectedRequest.status !== "Pending"}
                   className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
@@ -935,6 +915,9 @@ export default function ManagerApprovalInterface() {
       </DialogContent>
     </Dialog>
   )
+
+  // Hiển thị loading khi đang fetch
+  if (loading) return <div className="p-10 text-center text-lg">Đang tải dữ liệu...</div>;
 
   return (
     <div className="min-h-screen w-4/5 mx-auto bg-gray-50">

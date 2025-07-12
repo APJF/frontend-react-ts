@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,13 +15,35 @@ interface CourseListPageProps {
   onAddCourse: () => void
 }
 
-export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseListPageProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedLevel, setSelectedLevel] = useState<string>("all")
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 5
-  const navigate= useNavigate();
+export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPageProps) {
+  const [courses, setCourses] = useState<Subject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/api/courses");
+        const data = await response.json();
+        if (response.ok && data.success && Array.isArray(data.data)) {
+          setCourses(data.data);
+        } else {
+          setCourses([]);
+        }
+      } catch (err) {
+        setCourses([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCourses();
+  }, [])
 
   // Get unique levels and statuses for filters
   const uniqueLevels = Array.from(new Set(courses.map((course) => course.level)))
@@ -31,9 +53,9 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
       const matchesSearch =
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.creatorId.toLowerCase().includes(searchTerm.toLowerCase())
+        (course.title && course.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (course.id !== undefined && course.id !== null && course.id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase()))
 
       const matchesLevel = selectedLevel === "all" || course.level === selectedLevel
       const matchesStatus = selectedStatus === "all" || course.status === selectedStatus
@@ -50,33 +72,27 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "N1":
-        return "bg-red-600 text-white"
-      case "N2":
-        return "bg-blue-600 text-white"
-      case "N3":
-        return "bg-orange-600 text-white"
-      case "N4":
-        return "bg-purple-600 text-white"
-      case "N5":
-        return "bg-green-600 text-white"
-      case "Cơ bản":
-        return "bg-emerald-600 text-white"
+      case "BEGINNER":
+        return "bg-green-200 text-green-800 border-green-300";
+      case "INTERMEDIATE":
+        return "bg-orange-200 text-orange-800 border-orange-300";
+      case "ADVANCED":
+        return "bg-red-200 text-red-800 border-red-300";
       default:
-        return "bg-gray-500 text-white"
+        return "bg-gray-200 text-gray-800 border-gray-300";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Hoạt động":
-        return "bg-blue-600 text-white"
-      case "Tạm dừng":
-        return "bg-yellow-100 text-yellow-800 border border-yellow-300"
+      case "PUBLISHED":
+        return "bg-green-500 text-white border-green-600";
+      case "DRAFT":
+        return "bg-yellow-400 text-yellow-900 border-yellow-500";
       case "Nhập":
-        return "bg-blue-100 text-blue-800 border border-blue-300"
+        return "bg-red-200 text-red-700 border-red-300";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
   }
 
@@ -100,58 +116,51 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Filters */}
-        <div className="bg-white rounded-lg border border-blue-200 p-6 mb-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 rounded-xl border border-blue-300 p-8 mb-8 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
             {/* Search */}
             <div className="md:col-span-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-500" />
                 <Input
                   placeholder="Tìm kiếm khóa học..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="pl-12 border-blue-400 focus:border-blue-600 focus:ring-blue-600 bg-white/80 rounded-lg shadow-sm text-base"
                 />
               </div>
             </div>
-
             {/* Level Filter */}
             <div className="md:col-span-1">
               <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger className="border-blue-300 focus:border-blue-500 focus:ring-blue-500">
+                <SelectTrigger className="border-blue-400 focus:border-blue-600 focus:ring-blue-600 bg-white/80 rounded-lg shadow-sm text-base">
                   <SelectValue placeholder="Tất cả mức độ" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả mức độ</SelectItem>
                   {uniqueLevels.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
+                    <SelectItem key={level} value={level} className="text-base">{level}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
             {/* Status Filter */}
             <div className="md:col-span-1">
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="border-blue-300 focus:border-blue-500 focus:ring-blue-500">
+                <SelectTrigger className="border-blue-400 focus:border-blue-600 focus:ring-blue-600 bg-white/80 rounded-lg shadow-sm text-base">
                   <SelectValue placeholder="Tất cả trạng thái" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tất cả trạng thái</SelectItem>
                   {uniqueStatuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
+                    <SelectItem key={status} value={status} className="text-base">{status}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
             {/* Results Count */}
             <div className="md:col-span-1 text-right">
-              <span className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full font-medium">
+              <span className="text-base text-blue-700 bg-blue-200 px-4 py-2 rounded-full font-semibold shadow-sm">
                 Tìm thấy {filteredCourses.length} khóa học
               </span>
             </div>
@@ -159,10 +168,10 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
         </div>
 
         {/* Course Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-blue-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-200 overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300">
           {/* Table Header */}
-          <div className="bg-blue-600 text-white">
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <div className="grid grid-cols-12 gap-4 px-8 py-4 text-sm font-bold tracking-wide">
               <div className="col-span-1">STT</div>
               <div className="col-span-1">ID</div>
               <div className="col-span-4">Tên khóa học</div>
@@ -174,35 +183,43 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
 
           {/* Table Body */}
           <div className="divide-y divide-blue-100">
-            {currentCourses.length === 0 ? (
-              <div className="px-6 py-12 text-center">
-                <div className="text-blue-500">
-                  <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2 text-blue-700">Không tìm thấy khóa học</p>
-                  <p className="text-sm text-blue-600">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            {isLoading ? (
+              <div className="px-8 py-16 text-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="text-blue-400">
+                  <p className="text-xl font-semibold mb-2 text-blue-700">Đang tải dữ liệu...</p>
+                  <p className="text-base text-blue-600">Vui lòng chờ trong giây lát</p>
+                </div>
+              </div>
+            ) : currentCourses.length === 0 ? (
+              <div className="px-8 py-16 text-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="text-blue-400">
+                  <Search className="h-14 w-14 mx-auto mb-6 opacity-60" />
+                  <p className="text-xl font-semibold mb-2 text-blue-700">Không tìm thấy khóa học</p>
+                  <p className="text-base text-blue-600">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
                 </div>
               </div>
             ) : (
               currentCourses.map((course, index) => (
-                <div key={course.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-blue-50 transition-colors">
-                  <div className="col-span-1 text-sm text-blue-900 font-medium">{startIndex + index + 1}</div>
-                  <div className="col-span-1 text-sm font-bold text-blue-700">{course.topic}</div>
+                <div key={course.id} className="grid grid-cols-12 gap-4 px-8 py-3 hover:bg-blue-50 transition-all duration-200 rounded-xl items-center">
+                  <div className="col-span-1 text-xs text-blue-900 font-semibold">{startIndex + index + 1}</div>
+                  <div className="col-span-1 text-xs font-bold text-blue-700">{course.id}</div>
                   <div className="col-span-4">
-                    <div className="text-sm font-medium text-blue-900">{course.title}</div>
+                    <div className="text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors duration-150 cursor-pointer">
+                      {course.title}
+                    </div>
                   </div>
                   <div className="col-span-2">
-                    <Badge className={`${getLevelColor(course.level)} text-xs font-medium`}>{course.level}</Badge>
+                    <Badge className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm border ${getLevelColor(course.level)}`}>{course.level}</Badge>
                   </div>
-                  {/* <div className="col-span-2 text-sm text-blue-700 font-medium">{course.creatorId}</div> */}
                   <div className="col-span-3">
-                    <Badge className={`${getStatusColor(course.status)} text-xs font-medium`}>{course.status}</Badge>
+                    <Badge className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm border ${getStatusColor(course.status)}`}>{course.status}</Badge>
                   </div>
                   <div className="col-span-1">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => navigate(`/coursedetail`, { state: { course } })}
-                      className="h-8 w-8 p-0 hover:bg-blue-600 hover:text-white transition-colors"
+                      className="h-8 w-8 p-0 hover:bg-blue-600 hover:text-white transition-colors rounded-full border border-blue-200 shadow"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -211,8 +228,7 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
               ))
             )}
           </div>
-
-          {/* Pagination */}
+          {/* Pagination giữ nguyên */}
           {filteredCourses.length > 0 && (
             <div className="bg-blue-50 border-t border-blue-200 px-6 py-4">
               <div className="flex items-center justify-between">
@@ -268,3 +284,4 @@ export function CourseListPage({ courses, onViewDetails, onAddCourse }: CourseLi
     </div>
   )
 }
+

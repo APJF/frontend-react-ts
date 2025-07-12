@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,16 +17,39 @@ import {
   Award,
   ChevronRight,
   Edit,
+  Plus
 } from "lucide-react"
 import { Subject } from "../entity"
+import { useRouter } from "next/navigation"
 interface CourseDetailModalProps {
   course: Subject
   onClose: () => void
 }
 
-export function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
+export function CourseDetailModal({ course: initialCourse, onClose }: CourseDetailModalProps) {
   const [imageError, setImageError] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
+  const [course, setCourse] = useState<any>(initialCourse)
+  const [chapters, setChapters] = useState<any[]>([])
+  const router = useRouter()
+
+  useEffect(() => {
+    // Lấy courseId từ initialCourse hoặc fallback
+    const courseId = initialCourse?.id
+    if (!courseId) return;
+    // Gọi API lấy thông tin cơ bản
+    fetch(`http://localhost:8080/api/courses/${courseId}`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) setCourse(res.data)
+      })
+    // Gọi API lấy chi tiết chương và bài học
+    fetch(`http://localhost:8080/api/courses/${courseId}/detail`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data && res.data.chapters) setChapters(res.data.chapters)
+      })
+  }, [initialCourse])
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -252,11 +275,11 @@ export function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
-                      <div className="text-3xl font-bold text-blue-600 mb-2">{course.chapters.length}</div>
+                      <div className="text-3xl font-bold text-blue-600 mb-2">{chapters.length}</div>
                       <div className="text-sm text-blue-700 font-medium">Chương học</div>
                     </div>
                     <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
-                      <div className="text-3xl font-bold text-green-600 mb-2">{course.estimatedDuration}</div>
+                      <div className="text-3xl font-bold text-green-600 mb-2">{course.duration || course.estimatedDuration}</div>
                       <div className="text-sm text-green-700 font-medium">Thời lượng</div>
                     </div>
                     <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
@@ -264,8 +287,8 @@ export function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
                       <div className="text-sm text-purple-700 font-medium">Cấp độ</div>
                     </div>
                     <div className="text-center p-6 bg-orange-50 rounded-xl border border-orange-100">
-                      <div className="text-3xl font-bold text-orange-600 mb-2">#{course.orderNumber}</div>
-                      <div className="text-sm text-orange-700 font-medium">Thứ tự</div>
+                      <div className="text-3xl font-bold text-orange-600 mb-2">{course.status}</div>
+                      <div className="text-sm text-orange-700 font-medium">Trạng thái</div>
                     </div>
                   </div>
                 </CardContent>
@@ -276,27 +299,55 @@ export function CourseDetailModal({ course, onClose }: CourseDetailModalProps) {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <BookOpen className="h-6 w-6 text-orange-600" />
-                    Danh sách chương ({course.chapters.length})
+                    Danh sách chương ({chapters.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {course.chapters.map((chapter) => (
+                    {chapters.map((chapter) => (
                       <div
                         key={chapter.id}
-                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
+                        className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
                       >
-                        <div className="bg-orange-100 p-3 rounded-lg">
-                          <BookOpen className="h-5 w-5 text-orange-600" />
+                        <div className="flex items-center gap-4">
+                          <div className="bg-orange-100 p-3 rounded-lg">
+                            <BookOpen className="h-5 w-5 text-orange-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900 mb-1">{chapter.title}</div>
+                            <div className="text-sm text-gray-600">{chapter.description}</div>
+                          </div>
+                          <div className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                            {chapter.status}
+                          </div>
+                          {/* Nút thêm bài học */}
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
+                            onClick={() => {
+                              // Truyền object chapter và course (đã lấy từ backend)
+                              router.push(`/addunit?chapterId=${chapter.id}&courseId=${course.id}`);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-1" /> Thêm bài học
+                          </Button>
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
                         </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 mb-1">{chapter.title}</div>
-                          <div className="text-sm text-gray-600">{chapter.description}</div>
-                        </div>
-                        <div className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                          #{chapter.orderNumber}
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                        {/* Units */}
+                        {chapter.units && chapter.units.length > 0 && (
+                          <div className="pl-12 pt-2 space-y-2">
+                            {chapter.units.map((unit: any) => (
+                              <div key={unit.id} className="flex items-center gap-3 py-2 px-4 bg-white rounded border border-blue-100">
+                                <div className="w-7 h-7 bg-blue-200 rounded-full flex items-center justify-center">
+                                  <span className="text-xs text-blue-700 font-medium">{unit.title}</span>
+                                </div>
+                                <span className="text-blue-700 font-medium">{unit.title}</span>
+                                <span className="text-xs text-gray-500 ml-2">{unit.status}</span>
+                                <span className="text-xs text-gray-400 ml-2">{unit.description}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

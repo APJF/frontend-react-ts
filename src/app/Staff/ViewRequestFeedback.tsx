@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,112 +38,6 @@ interface Feedback {
   createdAt: string;
 }
 
-const sampleFeedbacks: Feedback[] = [
-  {
-    id: 1,
-    requestId: "REQ005",
-    courseTitle: "Kanji cơ bản - 300 chữ",
-    courseSubtitle: "Kanji về số đếm",
-    lessonTitle: "Số đếm từ 100-1000",
-    lessonCode: "lesson-1-6",
-    manager: "Nguyễn Văn Manager",
-    approvalDate: "Chưa duyệt",
-    decision: "Chờ duyệt",
-    createdAt: "2024-03-15T10:00:00Z",
-  },
-  {
-    id: 2,
-    requestId: "REQ001",
-    courseTitle: "Tiếng Nhật N5 - Cơ bản",
-    courseSubtitle: "Hiragana - Bảng chữ cái cơ bản",
-    lessonTitle: "Luyện tập Hiragana nâng cao",
-    lessonCode: "lesson-1-9",
-    manager: "Trần Văn Manager",
-    approvalDate: "16/3/2024",
-    decision: "Đã duyệt",
-    feedback: "Nội dung bài học rất tốt, phù hợp với trình độ N5",
-    createdAt: "2024-03-16T09:00:00Z",
-  },
-  {
-    id: 3,
-    requestId: "REQ002",
-    courseTitle: "Tiếng Nhật N5 - Cơ bản",
-    courseSubtitle: "Katakana - Bảng chữ cái ngoại lai",
-    lessonTitle: "Katakana trong từ ngoại lai",
-    lessonCode: "lesson-2-7",
-    manager: "Trần Văn Manager",
-    approvalDate: "14/3/2024",
-    decision: "Đã duyệt",
-    feedback: "Bài học có cấu trúc tốt, ví dụ phong phú",
-    createdAt: "2024-03-14T14:30:00Z",
-  },
-  {
-    id: 4,
-    requestId: "REQ003",
-    courseTitle: "Tiếng Nhật N4 - Sơ cấp",
-    courseSubtitle: "Ngữ pháp N4 cơ bản",
-    lessonTitle: "Mẫu câu điều kiện",
-    lessonCode: "lesson-3-5",
-    manager: "Lê Thị Manager",
-    approvalDate: "13/3/2024",
-    decision: "Từ chối",
-    feedback: "Nội dung chưa đủ chi tiết, cần bổ sung thêm ví dụ thực tế",
-    createdAt: "2024-03-13T11:15:00Z",
-  },
-  {
-    id: 5,
-    requestId: "REQ004",
-    courseTitle: "Tiếng Nhật N5 - Cơ bản",
-    courseSubtitle: "Kanji cơ bản N5",
-    lessonTitle: "Kanji về thời tiết",
-    lessonCode: "lesson-3-11",
-    manager: "Trần Văn Manager",
-    approvalDate: "12/3/2024",
-    decision: "Đã duyệt",
-    feedback: "Bài học hay, hình ảnh minh họa rõ ràng",
-    createdAt: "2024-03-12T16:45:00Z",
-  },
-  {
-    id: 6,
-    requestId: "REQ006",
-    courseTitle: "Tiếng Nhật N4 - Sơ cấp",
-    courseSubtitle: "Từ vựng N4",
-    lessonTitle: "Từ vựng về công việc",
-    lessonCode: "lesson-2-8",
-    manager: "Lê Thị Manager",
-    approvalDate: "10/3/2024",
-    decision: "Đã duyệt",
-    feedback: "Từ vựng phong phú, phù hợp với chương trình N4",
-    createdAt: "2024-03-10T13:20:00Z",
-  },
-  {
-    id: 7,
-    requestId: "REQ007",
-    courseTitle: "Tiếng Nhật N3 - Trung cấp",
-    courseSubtitle: "Ngữ pháp N3 nâng cao",
-    lessonTitle: "Cách sử dụng keigo",
-    lessonCode: "lesson-4-2",
-    manager: "Phạm Văn Manager",
-    approvalDate: "08/3/2024",
-    decision: "Từ chối",
-    feedback: "Nội dung quá khó so với trình độ, cần điều chỉnh",
-    createdAt: "2024-03-08T10:30:00Z",
-  },
-  {
-    id: 8,
-    requestId: "REQ008",
-    courseTitle: "Tiếng Nhật N2 - Trung cao cấp",
-    courseSubtitle: "Đọc hiểu N2",
-    lessonTitle: "Đọc hiểu văn bản dài",
-    lessonCode: "lesson-5-3",
-    manager: "Hoàng Thị Manager",
-    approvalDate: "05/3/2024",
-    decision: "Từ chối",
-    feedback: "Văn bản quá dài, cần chia nhỏ thành nhiều phần",
-    createdAt: "2024-03-05T15:10:00Z",
-  },
-];
-
 export default function StaffFeedbackPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -151,26 +45,69 @@ export default function StaffFeedbackPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [showDetailPage, setShowDetailPage] = useState(false);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const staffId = "2"; // TODO: Replace with dynamic staffId if needed
   const itemsPerPage = 6;
+
+  useEffect(() => {
+    async function fetchFeedbacks() {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/approval-requests/by-staff/${staffId}`
+        );
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          // Map API data to Feedback type
+          const mapped = json.data.map((item: any) => ({
+            id: item.id,
+            requestId: item.requestCode || item.requestId || "",
+            courseTitle: item.courseTitle || item.course?.title || "",
+            courseSubtitle: item.courseSubtitle || item.course?.subtitle || "",
+            lessonTitle: item.lessonTitle || item.lesson?.title || "",
+            lessonCode: item.lessonCode || item.lesson?.code || "",
+            manager: item.managerName || item.manager?.name || "",
+            managerAvatar: item.managerAvatar || item.manager?.avatar || undefined,
+            approvalDate: item.approvalDate || "Chưa duyệt",
+            decision:
+              item.status === "PENDING"
+                ? "Chờ duyệt"
+                : item.status === "APPROVED"
+                ? "Đã duyệt"
+                : item.status === "REJECTED"
+                ? "Từ chối"
+                : "Chờ duyệt",
+            feedback: item.feedback || "",
+            createdAt: item.createdAt || "",
+          }));
+          setFeedbacks(mapped);
+        } else {
+          setFeedbacks([]);
+        }
+      } catch (err) {
+        setFeedbacks([]);
+      }
+    }
+    fetchFeedbacks();
+  }, [staffId]);
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const total = sampleFeedbacks.length;
-    const pending = sampleFeedbacks.filter((f) => f.decision === "Chờ duyệt").length;
-    const approved = sampleFeedbacks.filter((f) => f.decision === "Đã duyệt").length;
-    const rejected = sampleFeedbacks.filter((f) => f.decision === "Từ chối").length;
+    const total = feedbacks.length;
+    const pending = feedbacks.filter((f) => f.decision === "Chờ duyệt").length;
+    const approved = feedbacks.filter((f) => f.decision === "Đã duyệt").length;
+    const rejected = feedbacks.filter((f) => f.decision === "Từ chối").length;
 
     return { total, pending, approved, rejected };
-  }, []);
+  }, [feedbacks]);
 
   // Get unique managers for filter
   const uniqueManagers = useMemo(() => {
-    return Array.from(new Set(sampleFeedbacks.map((f) => f.manager)));
-  }, []);
+    return Array.from(new Set(feedbacks.map((f) => f.manager)));
+  }, [feedbacks]);
 
   // Filter feedbacks
   const filteredFeedbacks = useMemo(() => {
-    return sampleFeedbacks.filter((feedback) => {
+    return feedbacks.filter((feedback) => {
       const matchesSearch =
         feedback.requestId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         feedback.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -181,7 +118,7 @@ export default function StaffFeedbackPage() {
 
       return matchesSearch && matchesStatus && matchesManager;
     });
-  }, [searchTerm, statusFilter, managerFilter]);
+  }, [searchTerm, statusFilter, managerFilter, feedbacks]);
 
   // Pagination
   const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
