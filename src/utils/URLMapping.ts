@@ -13,17 +13,17 @@ const URLMapping = {
   RESET_PASSWORD: "users/reset-password",
 
   // Subject APIs
-  LIST_SUBJECT: "/subjects/list",
-  SUBJECT_DETAIL: "/subjects/detail",
-  SUBJECT_CREATE: "/subjects/create",
-  SLOT_SKILL: "/slots/detail",
-  MATERIAL: "/materials/slot",
+  LIST_COURSE: "/courses",
+  COURSE_DETAIL: "/courses",
+  COURSE_CREATE: "/courses/create",
+  UNIT_SKILL: "/units/detail",
+  MATERIAL: "/materials/unit",
 
   // Chapter APIs
   CHAPTER_CREATE:"/chapters/create",
 
   // Unit APIs
-  UNIT_CREATE: "/slots/create",
+  UNIT_CREATE: "/units/create",
 
   // Material APIs
   MATERIAL_CREATE:"/materials/create",

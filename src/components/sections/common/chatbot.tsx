@@ -55,7 +55,6 @@ export default function ChatbotLocalhost() {
   const [editingContent, setEditingContent] = useState("")
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null)
   const [editingSessionName, setEditingSessionName] = useState("")
-  const [userId] = useState("1") // Mock user ID
   const [error, setError] = useState<string>("")
   const { API } = useAPI()
   const [currentMessages, setCurrentMessages] = useState<any[]>([])
@@ -377,8 +376,7 @@ export default function ChatbotLocalhost() {
                   <Bot className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">AI Assistant</h1>
-                  
+                  <h1 className="text-lg font-semibold text-gray-900">Trợ lý AI</h1>
                 </div>
               </div>
             <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)} className="lg:hidden">
@@ -621,7 +619,6 @@ export default function ChatbotLocalhost() {
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
                   placeholder="Nhập tin nhắn của bạn..."
                   disabled={isLoading || !currentChatId}
                   className="pr-12 py-3 rounded-2xl border-gray-300 focus:border-red-400 focus:ring-red-400"

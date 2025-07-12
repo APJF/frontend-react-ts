@@ -1,61 +1,70 @@
-export type MaterialType = {
-  id: number
+import type {Status} from "@/components/sections/enum"
+
+export interface Topic {
+  id: string
   name: string
-}
-export type user = {
-  email: string
-  avatar: string
+  description?: string
+  // Add other topic properties as needed
 }
 
-export type Material = {
-  id: number
-  description: string
+export interface ApprovalRequest {
+  id: string
+  status: Status
+  requestDate: string
+  approvalDate?: string
+  comments?: string
+  // Add other approval request properties as needed
+}
+
+export interface Material {
+  id: string
+  description?: string
   fileUrl: string
-  uploaderId: number
-  createdAt: string
-  updatedAt: string
-  type: MaterialType
-  unitId: number
+  type: string
+  unitId: string
+  unit?: Unit
+  approvalRequests?: ApprovalRequest[]
 }
 
-export type Unit = {
-  id: number
+export interface Unit {
+  id: string
   title: string
-  description: string
-  prerequisite: number
-  materials: Material[]
-  chapterId: number
+  description?: string
+  status: Status
+  prerequisiteUnitId?: string
+  prerequisiteUnit?: Unit
+  chapterId: string
+  chapter?: Chapter
+  materials?: Material[]
+  approvalRequests?: ApprovalRequest[]
 }
 
-export type Chapter = {
-  id: number
+export interface Chapter {
+  id: string
   title: string
-  description: string
-  prerequisite: number
-  slots: Unit[]
-  coursetId: number
+  description?: string
+  status: Status
+  prerequisiteChapterId?: string
+  prerequisiteChapter?: Chapter
+  courseId: string
+  course?: Course
+  units?: Unit[]
+  approvalRequests?: ApprovalRequest[]
 }
 
-export interface CreateChapterDTO {
-  id?: number; // optional nếu là tạo mới
-  title: string;
-  description: string;
-  orderNumber: number;
-  course: Course; // chính là object có id
-}
-
-
-export type Course = {
-  id: number
+export interface Course {
+  id: string
   title: string
-  topic: string
-  description: string
+  description?: string
+  duration: number
   level: string
-  estimatedDuration: string
-  creatorId: string
-  image: string
-  status: string
-  prerequisite: number
-  requirement:string
-  chapters: Chapter[]
+  image?: string
+  requirement?: string
+  status: Status
+  prerequisiteCourseId?: string
+  prerequisiteCourse?: Course
+  chapters?: Chapter[]
+  topics?: Topic[]
+  approvalRequests?: ApprovalRequest[]
 }
+

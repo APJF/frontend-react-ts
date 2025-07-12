@@ -1,7 +1,7 @@
 
 
 import { useEffect, useState } from "react"
-import { Search, Filter, Star, Clock, Users, BookOpen, ChevronDown, Award, Target } from "lucide-react"
+import { Search,Clock, Users,Award, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
@@ -28,7 +28,7 @@ export default function JapaneseCourseList() {
   const [pagination, setPagination] = useState({ totalElements: 0, totalPages: 0 });
 
   const loadData = async () => {
-    const response = await API.get(URLMapping.LIST_SUBJECT);
+    const response = await API.get(URLMapping.LIST_COURSE);
     setJapaneseCourses(response.content);
     setPagination({
       totalElements: response.totalElements,

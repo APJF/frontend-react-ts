@@ -99,8 +99,7 @@ export function RegisterForm() {
           </div>
         </div>
         <div className="space-y-2">
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <CardDescription className="text-gray-600">Start your Japanese learning journey today</CardDescription>
+          <CardTitle className="text-2xl font-bold">Tạo tài khoản của bạn</CardTitle>
         </div>
       </CardHeader>
 
@@ -111,7 +110,7 @@ export function RegisterForm() {
           disabled={isLoading}
         >
           <GoogleIcon className="mr-3 h-5 w-5" />
-          Continue with Google
+          Đăng nhập với Google
         </Button>
 
         <div className="relative">
@@ -119,7 +118,7 @@ export function RegisterForm() {
             <Separator className="w-full" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or create with email</span>
+            <span className="bg-white px-2 text-gray-500">Hoặc đăng ký với email</span>
           </div>
         </div>
 
@@ -141,7 +140,7 @@ export function RegisterForm() {
         >
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
-              Email Address
+              Email
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -149,7 +148,7 @@ export function RegisterForm() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`pl-10 h-12 ${error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
@@ -167,7 +166,7 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Password
+              Mật khẩu
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -175,7 +174,7 @@ export function RegisterForm() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
+                placeholder="Nhập mật khẩu"
                 value={formData.password}
                 onChange={handleInputChange}
                 className={`pl-10 pr-10 h-12 ${error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
@@ -201,7 +200,7 @@ export function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirm Password
+              Xác nhận mật khẩu
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -209,7 +208,7 @@ export function RegisterForm() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
+                placeholder="Xác nhận mật khẩu"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className={`pl-10 pr-10 h-12 ${error?.field === "confirmPassword" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
@@ -233,25 +232,6 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="flex items-start space-x-2">
-            <input
-              id="terms"
-              type="checkbox"
-              required
-              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mt-0.5"
-            />
-            <Label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
-              I agree to the{" "}
-              <Link to="/terms" className="text-red-600 hover:text-red-700 font-medium">
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link to="/privacy" className="text-red-600 hover:text-red-700 font-medium">
-                Privacy Policy
-              </Link>
-            </Label>
-          </div>
-
           <Button
             type="submit"
             className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-medium"
@@ -260,19 +240,19 @@ export function RegisterForm() {
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Creating account...
+                Đăng ký
               </div>
             ) : (
-              "Create Account"
+              "Đăng ký"
             )}
           </Button>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Already have an account?{" "}
+            Bạn đã có tài khoản?{" "}
             <Link to="/login" className="text-red-600 hover:text-red-700 font-medium">
-              Sign in here
+              Đăng nhập ngay
             </Link>
           </p>
         </div>
@@ -281,8 +261,6 @@ export function RegisterForm() {
           <div className="text-2xl mb-2">🎌</div>
           <p className="text-sm text-gray-700">
             <span className="font-medium text-red-600">ようこそ!</span> (Youkoso!)
-            <br />
-            Welcome to your Japanese learning adventure!
           </p>
         </div>
       </CardContent>

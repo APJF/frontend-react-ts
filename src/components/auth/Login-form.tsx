@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Link, redirect } from "react-router-dom"
+import { Link, useNavigate} from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,12 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
-import { loginWithEmail, loginWithGoogle } from "@/lib/auth"
+import {loginWithGoogle } from "@/lib/auth"
 import type { LoginCredentials, LoginError } from "@/types/auth"
 import { GoogleIcon } from "../icons/google-icon"
 import { useAPI } from "@/hooks/useAPI"
 import URLMapping from "@/utils/URLMapping"
-import { useNavigate, useParams } from "react-router-dom"
 
 export function LoginForm() {
   const [formData, setFormData] = useState<LoginCredentials>({
@@ -103,9 +102,9 @@ export function LoginForm() {
           </div>
         </div>
         <div className="space-y-2">
-          <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
+          <CardTitle className="text-2xl font-bold">Chào mừng!</CardTitle>
           <CardDescription className="text-gray-600">
-            Sign in to continue your Japanese learning journey
+            Đăng nhập để có thể trải nghiệm các khóa học của chúng tôi
           </CardDescription>
         </div>
       </CardHeader>
@@ -119,16 +118,14 @@ export function LoginForm() {
           disabled={isLoading}
         >
           <GoogleIcon className="mr-3 h-5 w-5" />
-          Continue with Google
+          Đăng nhập với Google
         </Button>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <Separator className="w-full" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or continue with email</span>
-          </div>
+          
         </div>
 
         {/* Error Alert */}
@@ -143,7 +140,7 @@ export function LoginForm() {
         <form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
-              Email Address
+              Email
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -151,7 +148,7 @@ export function LoginForm() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Nhập email"
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`pl-10 h-12 ${error?.field === "email" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
@@ -169,7 +166,7 @@ export function LoginForm() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Password
+              Mật khẩu
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -177,7 +174,7 @@ export function LoginForm() {
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 value={formData.password}
                 onChange={handleInputChange}
                 className={`pl-10 pr-10 h-12 ${error?.field === "password" ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
@@ -227,19 +224,19 @@ export function LoginForm() {
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
+                Đăng nhập
               </div>
             ) : (
-              "Sign In"
+              "Đăng nhập"
             )}
           </Button>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Không có tài khoản?{" "}
             <Link to="/register" className="text-red-600 hover:text-red-700 font-medium">
-              Sign up here
+              Đăng ký ngay
             </Link>
           </p>
         </div>
@@ -249,8 +246,6 @@ export function LoginForm() {
           <div className="text-2xl mb-2">🎌</div>
           <p className="text-sm text-gray-700">
             <span className="font-medium text-red-600">頑張って!</span> (Ganbatte!)
-            <br />
-            Let's continue learning Japanese together!
           </p>
         </div>
       </CardContent>
