@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Plus, Search } from "lucide-react"
-import type { Subject } from "../entity"
+import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react"
+import type { Course } from "../entity"
 import { useNavigate } from "react-router-dom"
 
 interface CourseListPageProps {
-  courses: Subject[]
-  onViewDetails: (course: Subject) => void
+  courses: Course[]
+  onViewDetails: (course: Course) => void
   onAddCourse: () => void
 }
 
 export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPageProps) {
-  const [courses, setCourses] = useState<Subject[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
@@ -96,6 +96,10 @@ export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPagePro
     }
   }
 
+  function handleEditCourse(course: Course): void {
+    throw new Error("Function not implemented.")
+  }
+
   return (
     <div className="min-h-screen bg-blue-50">
       {/* Header */}
@@ -173,11 +177,11 @@ export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPagePro
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
             <div className="grid grid-cols-12 gap-4 px-8 py-4 text-sm font-bold tracking-wide">
               <div className="col-span-1">STT</div>
-              <div className="col-span-1">ID</div>
-              <div className="col-span-4">Tên khóa học</div>
+              <div className="col-span-2">ID</div>
+              <div className="col-span-3">Tên khóa học</div>
               <div className="col-span-2">Mức độ</div>
-              <div className="col-span-3">Trạng thái</div>
-              <div className="col-span-1">Xem chi tiết</div>
+              <div className="col-span-2">Trạng thái</div>
+              <div className="col-span-2">Xem chi tiết</div>
             </div>
           </div>
 
@@ -202,8 +206,8 @@ export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPagePro
               currentCourses.map((course, index) => (
                 <div key={course.id} className="grid grid-cols-12 gap-4 px-8 py-3 hover:bg-blue-50 transition-all duration-200 rounded-xl items-center">
                   <div className="col-span-1 text-xs text-blue-900 font-semibold">{startIndex + index + 1}</div>
-                  <div className="col-span-1 text-xs font-bold text-blue-700">{course.id}</div>
-                  <div className="col-span-4">
+                  <div className="col-span-2 text-xs font-bold text-blue-700">{course.id}</div>
+                  <div className="col-span-3">
                     <div className="text-sm font-bold text-blue-700 hover:text-blue-900 transition-colors duration-150 cursor-pointer">
                       {course.title}
                     </div>
@@ -211,18 +215,36 @@ export function CourseListPage({ onViewDetails, onAddCourse }: CourseListPagePro
                   <div className="col-span-2">
                     <Badge className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm border ${getLevelColor(course.level)}`}>{course.level}</Badge>
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <Badge className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm border ${getStatusColor(course.status)}`}>{course.status}</Badge>
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-2 flex items-center gap-2 justify-center">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => navigate(`/coursedetail`, { state: { course } })}
+                      onClick={() => navigate(`/detail/${course.id}`, { state: { course } })}
                       className="h-8 w-8 p-0 hover:bg-blue-600 hover:text-white transition-colors rounded-full border border-blue-200 shadow"
+                      title="Xem chi tiết"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => navigate(`/updatecourse`, { state: { course } })}
+                      className="h-8 w-8 p-0 hover:bg-green-600 hover:text-white transition-colors"
+                      title="Chỉnh sửa"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        // onClick={() => handleDeleteCourse(course.id)}
+                        className="h-8 w-8 p-0 hover:bg-red-600 hover:text-white transition-colors"
+                        title="Xóa"
+                      >  <Trash2 className="h-4 w-4" />
+                      </Button>
                   </div>
                 </div>
               ))

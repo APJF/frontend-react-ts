@@ -255,17 +255,41 @@ export default function ManagerApprovalInterface() {
     }))
   }
 
+  const [isApproveConfirmDialogOpen, setIsApproveConfirmDialogOpen] = useState(false);
+  const [pendingApprovalId, setPendingApprovalId] = useState<number | null>(null);
+
+  const showApprovalConfirmation = (id: number) => {
+    setPendingApprovalId(id);
+    setIsApproveConfirmDialogOpen(true);
+  };
+
   const approveRequest = async (id: number) => {
     try {
       const res = await fetch(`http://localhost:8080/api/approval-requests/${id}/approve`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewedBy: "admin" }) // Nếu backend yêu cầu
+        headers: { 
+          "Content-Type": "application/json",
+          "X-User-Id": "manager-01" // Cần header X-User-Id theo API
+        },
+        body: JSON.stringify("") // API chỉ cần feedback nếu có
       });
       const data = await res.json();
       if (data.success) {
         toast.success("Yêu cầu đã được phê duyệt!");
-        setAllRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "Approved", updatedAt: new Date().toISOString() } : r));
+        // Cập nhật allRequests
+        setAllRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: "Approved" as const, updatedAt: new Date().toISOString() } : r));
+        
+        // Cập nhật selectedRequest nếu yêu cầu được duyệt là yêu cầu đang được xem
+        if (selectedRequest && selectedRequest.id === id) {
+          setSelectedRequest({
+            ...selectedRequest,
+            status: "Approved" as const,
+            updatedAt: new Date().toISOString()
+          });
+        }
+        
+        // Chỉ đóng dialog xác nhận, giữ dialog chi tiết mở
+        setIsApproveConfirmDialogOpen(false);
       } else {
         toast.error(data.message || "Phê duyệt thất bại!");
       }
@@ -280,7 +304,12 @@ export default function ManagerApprovalInterface() {
 
   const handleRejectClick = (request: Request, fromDetailDialog = false) => {
     if (fromDetailDialog) {
-      // Không mở popup mini, chỉ xử lý trong dialog chi tiết
+      // Kiểm tra xem đã nhập lý do từ chối chưa
+      if (!detailRejectFeedback.trim()) {
+        toast.error("Vui lòng nhập lý do từ chối yêu cầu!");
+        return;
+      }
+      // Nếu đã có lý do từ chối thì xử lý trong dialog chi tiết
       handleRejectSubmitFromDetail(request);
     } else {
       setRejectingRequest(request)
@@ -294,14 +323,29 @@ export default function ManagerApprovalInterface() {
       try {
         const res = await fetch(`http://localhost:8080/api/approval-requests/${request.id}/reject`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ feedback: detailRejectFeedback, reviewedBy: "admin" })
+          headers: { 
+            "Content-Type": "application/json",
+            "X-User-Id": "manager-01" // Header X-User-Id theo yêu cầu API
+          },
+          body: JSON.stringify(detailRejectFeedback) // Chỉ cần truyền feedback
         });
         const data = await res.json();
         if (data.success) {
           toast.success("Yêu cầu đã bị từ chối!");
-          setAllRequests((prev) => prev.map((r) => r.id === request.id ? { ...r, status: "Rejected", updatedAt: new Date().toISOString() } : r));
-          setIsDialogOpen(false);
+          // Cập nhật allRequests
+          setAllRequests((prev) => prev.map((r) => r.id === request.id ? { ...r, status: "Rejected" as const, updatedAt: new Date().toISOString() } : r));
+          
+          // Cập nhật selectedRequest nếu yêu cầu được từ chối là yêu cầu đang được xem
+          if (selectedRequest && selectedRequest.id === request.id) {
+            setSelectedRequest({
+              ...selectedRequest,
+              status: "Rejected" as const,
+              updatedAt: new Date().toISOString()
+            });
+          }
+          
+          // Không đóng dialog chi tiết để hiển thị trạng thái đã từ chối
+          // setIsDialogOpen(false);
           setDetailRejectFeedback("");
         } else {
           toast.error(data.message || "Từ chối thất bại!");
@@ -310,7 +354,7 @@ export default function ManagerApprovalInterface() {
         toast.error("Lỗi kết nối server!");
       }
     } else {
-      toast.error("Vui lòng nhập lý do từ chối!");
+      toast.error("Vui lòng nhập lý do từ chối yêu cầu!");
     }
   }
 
@@ -319,13 +363,26 @@ export default function ManagerApprovalInterface() {
       try {
         const res = await fetch(`http://localhost:8080/api/approval-requests/${rejectingRequest.id}/reject`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ feedback: rejectFeedback, reviewedBy: "admin" }) // Nếu backend yêu cầu
+          headers: { 
+            "Content-Type": "application/json",
+            "X-User-Id": "manager-01" // Header X-User-Id theo yêu cầu API
+          },
+          body: JSON.stringify(rejectFeedback) // Chỉ cần truyền feedback
         });
         const data = await res.json();
         if (data.success) {
           toast.success("Yêu cầu đã bị từ chối!");
-          setAllRequests((prev) => prev.map((r) => r.id === rejectingRequest.id ? { ...r, status: "Rejected", updatedAt: new Date().toISOString() } : r));
+          // Cập nhật allRequests
+          setAllRequests((prev) => prev.map((r) => r.id === rejectingRequest.id ? { ...r, status: "Rejected" as const, updatedAt: new Date().toISOString() } : r));
+          
+          // Cập nhật selectedRequest nếu yêu cầu được từ chối là yêu cầu đang được xem
+          if (selectedRequest && selectedRequest.id === rejectingRequest.id) {
+            setSelectedRequest({
+              ...selectedRequest,
+              status: "Rejected" as const,
+              updatedAt: new Date().toISOString()
+            });
+          }
         } else {
           toast.error(data.message || "Từ chối thất bại!");
         }
@@ -524,7 +581,7 @@ export default function ManagerApprovalInterface() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => approveRequest(req.id)}
+                  onClick={() => showApprovalConfirmation(req.id)}
                   disabled={req.status !== "Pending"}
                   className="mr-2 text-green-600 border-green-600 hover:bg-green-50"
                 >
@@ -721,9 +778,21 @@ export default function ManagerApprovalInterface() {
                 {/* Notes Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Ghi chú duyệt</h3>
-                  <p className="text-sm text-gray-600 mb-3">Ghi chú (bắt buộc khi từ chối)</p>
+                  <div className="flex items-center mb-3">
+                    <p className="text-sm text-gray-600">Ghi chú</p>
+                    <span className="text-sm font-medium text-red-600 ml-1">(bắt buộc khi từ chối)</span>
+                    {selectedRequest.status === "Pending" && !detailRejectFeedback.trim() && (
+                      <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded ml-auto">
+                        Vui lòng nhập lý do khi từ chối yêu cầu
+                      </div>
+                    )}
+                  </div>
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg resize-none"
+                    className={`w-full p-3 border rounded-lg resize-none ${
+                      selectedRequest.status === "Pending" && !detailRejectFeedback.trim() 
+                        ? "border-yellow-400 focus:ring-yellow-400 focus:border-yellow-400" 
+                        : "border-gray-300"
+                    }`}
                     rows={4}
                     placeholder="Nhập ghi chú về quyết định duyệt hoặc lý do từ chối..."
                     value={detailRejectFeedback}
@@ -862,7 +931,7 @@ export default function ManagerApprovalInterface() {
             <div className="border-t border-gray-200 px-8 py-6 bg-gray-50">
               <div className="flex gap-4">
                 <button
-                  onClick={() => approveRequest(selectedRequest.id)}
+                  onClick={() => showApprovalConfirmation(selectedRequest.id)}
                   disabled={selectedRequest.status !== "Pending"}
                   className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
@@ -873,7 +942,7 @@ export default function ManagerApprovalInterface() {
                 </button>
                 <button
                   onClick={() => handleRejectClick(selectedRequest, true)}
-                  disabled={selectedRequest.status !== "Pending"}
+                  disabled={selectedRequest.status !== "Pending" || !detailRejectFeedback.trim()}
                   className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -910,6 +979,54 @@ export default function ManagerApprovalInterface() {
           </Button>
           <Button variant="destructive" onClick={handleRejectSubmit} disabled={!rejectFeedback.trim()}>
             Từ chối
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+  
+  const renderApproveConfirmDialog = () => (
+    <Dialog open={isApproveConfirmDialogOpen} onOpenChange={setIsApproveConfirmDialogOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Xác nhận phê duyệt</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Bạn có chắc chắn muốn phê duyệt yêu cầu này không? 
+            Sau khi phê duyệt, yêu cầu sẽ được áp dụng vào hệ thống.
+          </p>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex gap-3">
+              <svg 
+                className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
+                />
+              </svg>
+              <p className="text-sm text-yellow-700">
+                Hành động này không thể hoàn tác sau khi được thực hiện.
+              </p>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsApproveConfirmDialogOpen(false)}>
+            Hủy
+          </Button>
+          <Button 
+            variant="default" 
+            onClick={() => pendingApprovalId && approveRequest(pendingApprovalId)}
+            className="bg-gray-900 hover:bg-gray-800 text-white"
+          >
+            Xác nhận phê duyệt
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1119,6 +1236,7 @@ export default function ManagerApprovalInterface() {
 
         {renderDetailDialog()}
         {renderRejectDialog()}
+        {renderApproveConfirmDialog()}
       </div>
     </div>
   )

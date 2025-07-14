@@ -19,10 +19,10 @@ import {
   Edit,
   Plus
 } from "lucide-react"
-import { Subject } from "../entity"
-import { useRouter } from "next/navigation"
+import { Course } from "../entity"
+import { useNavigate } from "react-router-dom"
 interface CourseDetailModalProps {
-  course: Subject
+  course: Course
   onClose: () => void
 }
 
@@ -31,24 +31,48 @@ export function CourseDetailModal({ course: initialCourse, onClose }: CourseDeta
   const [imageLoading, setImageLoading] = useState(true)
   const [course, setCourse] = useState<any>(initialCourse)
   const [chapters, setChapters] = useState<any[]>([])
-  const router = useRouter()
+  const navigate = useNavigate()
+  
+  // Kiểm tra ngay khi component khởi tạo
+  console.log("CourseDetailModal initialized with:", { 
+    initialCourse, 
+    "initialCourse.id": initialCourse?.id,
+    "course state initial value": course,
+    "course.id initial value": course?.id
+  })
 
   useEffect(() => {
     // Lấy courseId từ initialCourse hoặc fallback
     const courseId = initialCourse?.id
-    if (!courseId) return;
+    console.log("Initial course from props:", initialCourse);
+    
+    if (!courseId) {
+      console.error("courseId is missing from initialCourse");
+      return;
+    }
+    
+    console.log("Fetching course data for ID:", courseId);
+    
     // Gọi API lấy thông tin cơ bản
     fetch(`http://localhost:8080/api/courses/${courseId}`)
       .then(res => res.json())
       .then(res => {
-        if (res.success && res.data) setCourse(res.data)
+        console.log("API response for course:", res);
+        if (res.success && res.data) {
+          console.log("Setting course data:", res.data);
+          setCourse(res.data)
+        }
       })
+      .catch(err => console.error("Error fetching course:", err));
+      
     // Gọi API lấy chi tiết chương và bài học
     fetch(`http://localhost:8080/api/courses/${courseId}/detail`)
       .then(res => res.json())
       .then(res => {
+        console.log("API response for chapters:", res);
         if (res.success && res.data && res.data.chapters) setChapters(res.data.chapters)
       })
+      .catch(err => console.error("Error fetching chapters:", err));
   }, [initialCourse])
 
   const getLevelColor = (level: string) => {
@@ -324,12 +348,67 @@ export function CourseDetailModal({ course: initialCourse, onClose }: CourseDeta
                           <Button
                             size="sm"
                             className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
-                            onClick={() => {
-                              // Truyền object chapter và course (đã lấy từ backend)
-                              router.push(`/addunit?chapterId=${chapter.id}&courseId=${course.id}`);
+                            onClick={(e) => {
+                              // Ngăn chặn các hành vi mặc định và event bubbling
+                              e.preventDefault();
+                              e.stopPropagation();
+                              
+                              // Đóng modal trước khi chuyển hướng
+                              if (typeof onClose === 'function') {
+                                onClose();
+                              }
+                              
+                              // Log chi tiết hơn để debug
+                              console.log("Modal - Add Unit button clicked", { 
+                                courseId: course.id, 
+                                chapterId: chapter.id,
+                                courseType: typeof course.id,
+                                chapterType: typeof chapter.id
+                              });
+                              
+                              // Sử dụng navigate thay vì window.location để duy trì client-side routing
+                              navigate(`/addunit/${course.id}/${chapter.id}`);
+                              
+                              // Ngăn chặn các sự kiện khác
+                              return false;
                             }}
                           >
                             <Plus className="h-4 w-4 mr-1" /> Thêm bài học
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white ml-2"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // Try direct link opening in a new tab
+                              console.log("Test button clicked");
+                              const targetUrl = `/addunit/${course.id}/${chapter.id}`;
+                              window.open(targetUrl, '_blank');
+                            }}
+                          >
+                            Test Link
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-amber-500 hover:bg-amber-600 text-white ml-2"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              
+                              if (typeof onClose === 'function') {
+                                onClose();
+                              }
+                              
+                              // Thử route tester với cùng params
+                              const testUrl = `/test-route/${course.id}/${chapter.id}`;
+                              console.log("Testing route tester URL:", testUrl);
+                              
+                              // Sử dụng navigate thay vì window.location để duy trì client-side routing
+                              navigate(testUrl);
+                            }}
+                          >
+                            Test Route
                           </Button>
                           <ChevronRight className="h-5 w-5 text-gray-400" />
                         </div>
@@ -360,8 +439,36 @@ export function CourseDetailModal({ course: initialCourse, onClose }: CourseDeta
         {/* Footer */}
         <div className="border-t border-gray-200 p-6 bg-gray-50">
           <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => {
+              window.open('/addchapter/course-01', '_blank');
+            }} className="px-6 bg-amber-500 text-white">
+              Test Direct Link
+            </Button>
             <Button variant="outline" onClick={onClose} className="px-6">
               Đóng
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 px-6 text-white"
+              onClick={() => {
+                // Lấy courseId từ cả hai nguồn có thể
+                const courseId = course?.id || initialCourse?.id || "course-01";
+                
+                console.log("Using courseId:", courseId);
+                console.log("courseId type:", typeof courseId);
+                console.log("initialCourse:", initialCourse);
+                
+                // Sử dụng useNavigate thay vì window.location
+                try {
+                  navigate(`/addchapter/${courseId}`);
+                } catch (error) {
+                  console.error("Navigation error:", error);
+                  
+                  // Fallback nếu navigate không hoạt động
+                  window.location.href = `/addchapter/${courseId}`;
+                }
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Thêm chương
             </Button>
             <Button className="bg-red-600 hover:bg-red-700 px-6">
               <Edit className="h-4 w-4 mr-2" />

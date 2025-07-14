@@ -1,55 +1,70 @@
-export interface Chapter {
-  id: number
-  title: string
-  description: string
-  orderNumber: number
-  subjectId: number
-  createdAt: string
-  updatedAt: string
-  lessonCount: number
-  duration: string
+import type {Status} from "@/components/sections/enum"
+
+export interface Topic {
+  id: string
+  name: string
+  description?: string
+  // Add other topic properties as needed
 }
 
-export interface Subject {
-  id: number
-  title: string
-  topic: string
-  description: string
-  level: string
-  estimatedDuration: string
-  creatorId: string
-  image: string
-  createdAt: string
-  updatedAt: string
-  status: string
-  orderNumber: number
-  chapters: Chapter[]
-  studentCount: number
-  lessonCount: number
-  rating: number
-}
-
-export interface Slot {
-  id: number
-  title: string
-  description: string
-  orderNumber: number
-  chapterId: number
-  createdAt: string
-  updatedAt: string
+export interface ApprovalRequest {
+  id: string
+  status: Status
+  requestDate: string
+  approvalDate?: string
+  comments?: string
+  // Add other approval request properties as needed
 }
 
 export interface Material {
-  id: number
-  title: string
-  description: string
+  id: string
+  description?: string
   fileUrl: string
-  imgUrl: string
   type: string
-  status: string
-  uploaderId: string
-  subjectId: number
-  createdAt: string
-  updatedAt: string
-  subject: Subject
+  unitId: string
+  unit?: Unit
+  approvalRequests?: ApprovalRequest[]
 }
+
+export interface Unit {
+  id: string
+  title: string
+  description?: string
+  status: Status
+  prerequisiteUnitId?: string
+  prerequisiteUnit?: Unit
+  chapterId: string
+  chapter?: Chapter
+  materials?: Material[]
+  approvalRequests?: ApprovalRequest[]
+}
+
+export interface Chapter {
+  id: string
+  title: string
+  description?: string
+  status: Status
+  prerequisiteChapterId?: string
+  prerequisiteChapter?: Chapter
+  courseId: string
+  course?: Course
+  units?: Unit[]
+  approvalRequests?: ApprovalRequest[]
+}
+
+export interface Course {
+  id: string
+  title: string
+  description?: string
+  duration: number
+  level: string
+  image?: string
+  requirement?: string
+  status: Status
+  prerequisiteCourseId?: string
+  prerequisiteCourse?: Course
+  chapters?: Chapter[]
+  topics?: Topic[]
+  approvalRequests?: ApprovalRequest[]
+}
+

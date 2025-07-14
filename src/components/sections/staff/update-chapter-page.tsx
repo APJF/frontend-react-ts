@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { Chapter, Subject } from "../entity";
+import type { Chapter, Course } from "../entity";
 
 interface UpdateChapterPageProps {
   onBack?: () => void;
@@ -19,7 +19,7 @@ export function UpdateChapterPage({ onBack, onUpdateChapter }: UpdateChapterPage
   const location = useLocation();
   const navigate = useNavigate();
   const chapter = (location.state && location.state.chapter) as Chapter | undefined;
-  const course = (location.state && location.state.course) as Subject | undefined;
+  const course = (location.state && location.state.course) as Course | undefined;
 
   const [formData, setFormData] = useState({
     id: chapter?.id || "",

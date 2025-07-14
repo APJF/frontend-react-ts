@@ -1,5 +1,5 @@
 import AutoLayout from "@/components/layout/AutoLayout";
-import type { Subject, Chapter } from "@/components/sections/entity";
+import type { Course, Chapter } from "@/components/sections/entity";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ const ChapterDetailPage: React.FC = () => {
 
   // Lấy chapterId từ location.state hoặc từ chapter truyền vào
   const chapterState = location.state?.chapter as Chapter | undefined;
-  const course = location.state?.course as Subject | undefined;
+  const course = location.state?.course as Course | undefined;
   const chapterId = chapterState?.id || location.state?.chapterId;
 
   const [chapter, setChapter] = useState<any>(chapterState || null);
@@ -62,9 +62,9 @@ const ChapterDetailPage: React.FC = () => {
     ...chapter,
     status: chapter.status || 'active',
     courseId: chapter.courseId || course?.id || '',
-    topic: course?.topic || '',
+    topic: course?.topics || '',
     description: chapter.description || '',
-    estimatedDuration: chapter.estimatedDuration || course?.estimatedDuration || '',
+    estimatedDuration: chapter.estimatedDuration || course?.duration || '',
     level: chapter.level || course?.level || '',
     prerequisiteCourse: chapter.prerequisiteCourse || '',
   };
@@ -94,9 +94,19 @@ const ChapterDetailPage: React.FC = () => {
               <div className="space-y-2 text-left text-blue-900 text-base font-medium">
                 <div><span className="font-semibold">Mã khóa học:</span> {course?.id || chapterWithStatus.courseId}</div>
                 <div><span className="font-semibold">Tiêu đề:</span> {course?.title || ''}</div>
-                <div><span className="font-semibold">Chủ đề:</span> {course?.topic || ''}</div>
+                <div>
+                  <span className="font-semibold">Chủ đề:</span>{" "}
+                  {Array.isArray(course?.topics)
+                    ? course.topics.map((topic: any, idx: number) => (
+                        <span key={topic.id || idx}>
+                          {topic.name || topic}
+                          {idx < (course.topics?.length ?? 0) - 1 ? ", " : ""}
+                        </span>
+                      ))
+                    : course?.topics || course?.topics || ""}
+                </div>
                 <div><span className="font-semibold">Level:</span> {course?.level || ''}</div>
-                <div><span className="font-semibold">Thời gian hoàn thành:</span> {course?.estimatedDuration || ''}</div>
+                <div><span className="font-semibold">Thời gian hoàn thành:</span> {course?.duration || ''}</div>
                 <div><span className="font-semibold">Khóa học tiên quyết:</span> {(course as any)?.prerequisiteCourse || 'Không có'}</div>
               </div>
               <div className="mt-4 text-blue-700 text-sm">
@@ -116,7 +126,16 @@ const ChapterDetailPage: React.FC = () => {
                 <h1 className="text-2xl font-bold text-blue-900">Chi tiết chương</h1>
               </div>
               <div className="flex items-center gap-3 mb-4">
-                <Button onClick={() => navigate('/addunit', { state: { chapter: chapterWithStatus, course } })} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log("Add Unit button clicked", { courseId: course?.id, chapterId: chapterWithStatus?.id });
+                    const targetUrl = `/addunit/${course?.id}/${chapterWithStatus?.id}`;
+                    console.log("Navigating to:", targetUrl);
+                    navigate(targetUrl);
+                  }} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Thêm bài học
                 </Button>

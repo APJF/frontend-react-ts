@@ -11,10 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, BookOpen, Info, Sparkles, Plus, Hash } from "lucide-react"
-import type { Subject } from "../entity"
+import type { Chapter, Course } from "../entity"
 
 interface AddChapterPageProps {
-  course: Subject
+  course: Course
   onBack: () => void
   onCreateChapter: (chapterData: {
     chapterId: string

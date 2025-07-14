@@ -27,10 +27,10 @@ export const MenuItemsStaff= [
     path: "/addnew",
   },
   {
-    label: "Chat Tracking",
+    label: "Phản hồi từ Manager",
     key: "live-chat",
     icon: <MessageOutlined />,
-    path: "/live-chat",
+    path: "/feedback",
 
   },
   {

@@ -30,11 +30,11 @@ import {
   Target,
   Award,
 } from "lucide-react"
-import type { Subject, Chapter } from "../entity"
+import type { Course, Chapter } from "../entity"
 import { useNavigate, useLocation } from "react-router-dom"
 
 interface AddLessonPageProps {
-  course: Subject
+  course: Course
   chapter: Chapter
   onBack: () => void
   onCreateLesson: (lessonData: {
@@ -52,12 +52,15 @@ interface AddLessonPageProps {
 }
 
 export function AddLessonPage(props: AddLessonPageProps) {
-  // Lấy object chapter và course từ location.state nếu có (ưu tiên object từ backend)
-  const location = useLocation();
-  const chapterFromState = location.state?.chapter;
-  const courseFromState = location.state?.course;
-  const chapter = chapterFromState || props.chapter;
-  const course = courseFromState || props.course;
+  // Sử dụng trực tiếp props đã được truyền vào từ AddNewUnit component
+  const { course, chapter } = props;
+  
+  console.log("AddLessonPage loaded with data:", { 
+    chapter, 
+    course,
+    propsChapter: props.chapter, 
+    propsCourse: props.course 
+  });
 
   const [formData, setFormData] = useState({
     unitId: "",
@@ -77,7 +80,10 @@ export function AddLessonPage(props: AddLessonPageProps) {
     },
   ])
 
-  const [chapterData, setChapterData] = useState<Chapter>(chapter);
+  // Sử dụng chapter trực tiếp thay vì lưu vào state riêng
+  // Tính số thứ tự chương trong mảng
+  const chapterIndex = course?.chapters?.findIndex((c: Chapter) => c.id === chapter?.id) ?? -1;
+  const chapterOrder = chapterIndex >= 0 ? chapterIndex + 1 : "";
 
   const skillTypes = [
     { value: "vocabulary", label: "Từ vựng" },
@@ -132,15 +138,20 @@ export function AddLessonPage(props: AddLessonPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("Submitting form with chapter ID:", chapter?.id);
+    
     // Chuẩn bị payload gửi backend
     const payload = {
       id: formData.unitId,
       title: formData.title,
       description: formData.unitDescription,
       status: "DRAFT",
-      chapterId: chapterData.id, // dùng id đã được cập nhật đúng dạng string
+      chapterId: chapter.id, // Sử dụng trực tiếp từ props
       prerequisiteUnitId: formData.prerequisiteUnit || null,
     };
+    
+    console.log("Payload to send:", payload);
+    
     try {
       const response = await fetch("http://localhost:8080/api/units", {
         method: "POST",
@@ -158,31 +169,27 @@ export function AddLessonPage(props: AddLessonPageProps) {
         alert(data.message || "Tạo bài học thất bại!")
       }
     } catch (err) {
+      console.error("Error creating unit:", err);
       alert("Lỗi kết nối server!")
     }
   }
 
+  // Loại bỏ useEffect không cần thiết vì chúng ta đã có dữ liệu từ props
+  // và đã xử lý trực tiếp trong AddNewUnit component
+  
+  // Thêm useEffect để kiểm tra và log thông tin khi component render
   useEffect(() => {
-    // Nếu chapter.id là số, fetch lại thông tin chapter từ backend để lấy id dạng string
-    if (chapter && typeof chapter.id === 'number' && course?.id) {
-      fetch(`http://localhost:8080/api/chapters/${chapter.id}`)
-        .then(res => res.json())
-        .then(res => {
-          if (res.success && res.data) {
-            setChapterData(res.data);
-          } else {
-            alert('Không tìm thấy chương học. Vui lòng quay lại.');
-            navigate(-1);
-          }
-        })
-        .catch(() => {
-          alert('Không thể tải dữ liệu chương học.');
-          navigate(-1);
-        });
-    } else if (chapter && typeof chapter.id === 'string') {
-      setChapterData(chapter);
+    console.log("AddLessonPage rendered with chapter:", chapter);
+    console.log("AddLessonPage rendered with course:", course);
+    
+    // Kiểm tra nếu thiếu thông tin cần thiết
+    if (!chapter || !chapter.id) {
+      console.error("Missing chapter information");
     }
-  }, [chapter, course, navigate])
+    if (!course || !course.id) {
+      console.error("Missing course information");
+    }
+  }, [chapter, course])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -192,7 +199,7 @@ export function AddLessonPage(props: AddLessonPageProps) {
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              onClick={() => window.history.back()}
+              onClick={props.onBack}
               className="p-2 hover:bg-blue-100 text-blue-600 rounded-full transition-all duration-200"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -240,7 +247,7 @@ export function AddLessonPage(props: AddLessonPageProps) {
                   <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-blue-600 font-medium text-xs">ID KHÓA HỌC</span>
-                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.topic}</Badge>
+                      <Badge className="bg-blue-600 text-white font-mono text-xs">{course.id}</Badge>
                     </div>
                   </div>
 
@@ -264,17 +271,17 @@ export function AddLessonPage(props: AddLessonPageProps) {
                       <Hash className="h-4 w-4 text-purple-600" />
                       <span className="text-purple-600 font-medium text-xs">CHƯƠNG</span>
                     </div>
-                    <Badge className="bg-purple-600 text-white text-xs mb-2">Chapter - {chapterData.orderNumber}</Badge>
+                    <Badge className="bg-purple-600 text-white text-xs mb-2">Chapter - {chapterOrder}</Badge>
                   </div>
 
                   <div className="mb-4">
                     <div className="text-purple-600 font-medium text-xs mb-1">TÊN CHƯƠNG</div>
-                    <h4 className="text-purple-900 font-bold text-sm leading-tight">{chapterData.title}</h4>
+                    <h4 className="text-purple-900 font-bold text-sm leading-tight">{chapter.title}</h4>
                   </div>
 
                   <div className="mb-4">
                     <div className="text-purple-600 font-medium text-xs mb-1">THỨ TỰ CHƯƠNG</div>
-                    <div className="text-purple-900 font-semibold">Chương {chapterData.orderNumber}</div>
+                    <div className="text-purple-900 font-semibold">Chương {chapterOrder}</div>
                   </div>
 
                   <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">

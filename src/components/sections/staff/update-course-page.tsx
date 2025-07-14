@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Upload } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import type { Subject } from "../entity"
+import type { Course } from "../entity"
 
 interface UpdateCoursePageProps {
   onBack?: () => void
@@ -19,13 +19,13 @@ interface UpdateCoursePageProps {
 export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePageProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const course = (location.state && location.state.course) as Subject | undefined;
+  const course = (location.state && location.state.course) as Course | undefined;
 
   const [formData, setFormData] = useState({
     id: course?.id || "",
     title: course?.title || "",
     description: course?.description || "",
-    estimatedDuration: course?.estimatedDuration || "",
+    estimatedDuration: course?.duration || "",
     level: course?.level || "",
     image: course?.image || "",
     requirement: (course as any)?.requirement || "",
@@ -36,9 +36,11 @@ export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePagePro
   const [dragActive, setDragActive] = useState(false)
 
   const levels = [
-    { value: "BEGINNER", label: "Beginner" },
-    { value: "INTERMEDIATE", label: "Intermediate" },
-    { value: "ADVANCED", label: "Advanced" },
+    { value: "N5", label: "N5" },
+    { value: "N4", label: "N4" },
+    { value: "N3", label: "N3" },
+    { value: "N2", label: "N2" },
+    { value: "N1", label: "N1" },
   ];
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function UpdateCoursePage({ onBack, onUpdateCourse }: UpdateCoursePagePro
         id: course.id || "",
         title: course.title || "",
         description: course.description || "",
-        estimatedDuration: course.estimatedDuration || "",
+        estimatedDuration: course.duration || "",
         level: course.level || "",
         image: course.image || "",
         requirement: (course as any)?.requirement || "",

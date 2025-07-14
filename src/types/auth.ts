@@ -20,6 +20,11 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface VerifyOTP{
+  email: string
+  otp: 
+}
+
 export interface RegisterData {
   email: string
   password: string

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Upload } from "lucide-react"
-import type { Subject } from "../entity"
+import type { Course } from "../entity"
 interface CreateCourseData {
   id: string;
   title: string;

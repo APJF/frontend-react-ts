@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate} from 'react-router-dom'
 import LoginPage from './app/Authentication/LoginPage';
 import RegisterPage from './app/Authentication/RegisterPage';
 import CourseListPage from './app/Common/CourseListPage'
@@ -26,6 +26,12 @@ import TestPreparationPage from './app/Common/TestPreparationPage';
 import TestDoPage from './app/Common/TestDoPage';
 import TestResultPage from './app/Common/TestResultPage';
 import TestReviewPage from './app/Common/TestReviewPage';
+import { FeedbackManagerPage } from './components/sections/staff/feedback-manager-page';
+import SimpleVerify from './components/auth/Verify';
+import ChangePassPage from './app/Authentication/ChangePassPage';
+import FogotPassPage from './app/Authentication/FogotPassPage';
+import ResetPassPage from './app/Authentication/ResetPassPage';
+import TestRoutePage from './app/TestRoutePage';
 
 function App() {
   const isAuthenticated = false;
@@ -33,9 +39,13 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/test-route" element={<TestRoutePage />} />
+      <Route path="/test-route/:param1" element={<TestRoutePage />} />
+      <Route path="/test-route/:param1/:param2" element={<TestRoutePage />} />
       {/* Thay vì AuthPage, bạn có thể render LoginPage hoặc một component khác */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify" element={<SimpleVerify />} />
       <Route path="/courselist" element={<CourseListPage />} />
       <Route path="/coursedetail/:id" element={<CourseDetail />} />
       <Route path="/chatbot" element={<ChatbotPage />} />
@@ -45,14 +55,19 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/viewlistcourse" element={<StaffViewListCourse />} />
       <Route path="/addnew" element={<AddNewCourse />} />
-      <Route path="/coursedetail" element={<ViewCourseDetail />} />
-      <Route path="/addchapter" element={<AddNewChapter />} />
-      <Route path="/addunit" element={<AddNewUnit />} />
+      <Route path="/detail/:courseId" element={<ViewCourseDetail />} />
+      <Route path="/addchapter/:courseId" element={<AddNewChapter />} />
+      <Route path="/addunit/:courseId/:chapterId" element={<AddNewUnit />} />
       <Route path="/chapterdetail" element={<ChapterDetailPage />} />
       <Route path="/unitdetail" element={<UnitDetailPage />} />
       <Route path="/updatecourse" element={<UpdateCoursePage />} />
       <Route path="/updatechapter" element={<UpdateChapterPage />} />
       <Route path="/updateunit" element={<UpdateUnitPage />} />
+      <Route path="/feedback" element={<FeedbackManagerPage />} />
+      <Route path="/changepass" element={<ChangePassPage />} />
+      <Route path="/fogotpass" element={<FogotPassPage />} />
+      <Route path="/resetpass" element={<ResetPassPage />} />
+      {/* Catch-all route - phải để cuối cùng */}
       <Route path="*" element={<HomePage />} />
       <Route path="/manager/request" element={<Dashboard />} />
       <Route path="/staff/viewrequestfeedback" element={<ViewRequestFeedback />} />

@@ -69,7 +69,7 @@ export default function JapaneseLearningPage() {
   }, [])
 
   const loadData = async () => {
-    const response = await API.get(URLMapping.SLOT_SKILL + `/${id}`);
+    const response = await API.get(URLMapping.UNIT_SKILL + `/${id}`);
     console.log(response);
     setSlotData(response);
     setSlotSkill([response]);

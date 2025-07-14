@@ -20,11 +20,11 @@ import {
   Award,
   Target,
 } from "lucide-react"
-import type { Subject } from "../entity"
+import type { Course } from "../entity"
 import { useNavigate } from "react-router-dom"
 
 interface CourseDetailLayoutPageProps {
-  course: Subject
+  course: Course
   onBack: () => void
 }
 
@@ -72,9 +72,9 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
     ...course,
     id: course.id || 'JPD111',
     title: course.title || 'Tiếng Nhật sơ cấp N5',
-    topic: course.topic || 'Giao tiếp cơ bản',
+    topic: course.topics || 'Giao tiếp cơ bản',
     description: course.description || 'Khóa học tiếng Nhật N5 dành cho người mới bắt đầu, giúp bạn nắm vững các kiến thức cơ bản nhất của tiếng Nhật như Hiragana, Katakana, 100 chữ Kanji cơ bản, và các cấu trúc ngữ pháp cơ bản.',
-    estimatedDuration: course.estimatedDuration || (course as any).duration || '',
+    estimatedDuration: course.duration || (course as any).duration || '',
     level: course.level || 'N5',
     prerequisiteCourse: (course as any).prerequisiteCourse || '',
     status: course.status || 'active',
@@ -100,7 +100,13 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={ () => navigate(`/addchapter`, { state: { course: courseWithInfo } }) } className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+              <Button 
+                onClick={ () => {
+                  console.log("Navigating with course ID:", course?.id);
+                  navigate(`/addchapter/${course?.id}`);
+                }} 
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Thêm chương
               </Button>
@@ -288,7 +294,8 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                               className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/addunit`, { state: { chapterId: chapter.id, courseId: course.id } })
+                                console.log("Navigating to add unit with courseId:", course?.id, "and chapterId:", chapter?.id);
+                                navigate(`/addunit/${course?.id}/${chapter?.id}`)
                               }}
                             >
                               <Plus className="h-4 w-4 mr-1" />
@@ -343,7 +350,13 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                                   </div>
                                   <p className="text-blue-600 font-medium mb-2">Chưa có bài học nào</p>
                                   <p className="text-sm text-blue-500 mb-4">Thêm bài học đầu tiên cho chương này</p>
-                                  <Button onClick={() => navigate(`/addunit`, { state: { chapterId: chapter.id, courseId: course.id } })} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                  <Button 
+                                    onClick={() => {
+                                      console.log("Navigating to add unit with courseId:", course?.id, "and chapterId:", chapter?.id);
+                                      navigate(`/addunit/${course?.id}/${chapter?.id}`)
+                                    }} 
+                                    size="sm" 
+                                    className="bg-blue-600 hover:bg-blue-700 text-white">
                                     <Plus className="h-4 w-4 mr-2" />
                                     Thêm bài học
                                   </Button>
@@ -359,7 +372,10 @@ export function CourseDetailLayoutPage({ course, onBack }: CourseDetailLayoutPag
                 {/* Add New Chapter Button */}
                 <div className="mt-8 pt-6 border-t border-blue-200">
                   <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 text-lg font-medium shadow-lg"
-                    onClick={() => navigate('/addchapter', { state: { course: courseWithInfo } })}
+                    onClick={() => {
+                      console.log("Navigating to add chapter with course ID:", course?.id);
+                      navigate(`/addchapter/${course?.id}`);
+                    }}
                   >
                     <Plus className="h-5 w-5 mr-2" />
                     Thêm chương mới
